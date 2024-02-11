@@ -17,6 +17,7 @@ const jsFlow = (function (svgPanZoom, options) {
   const SHAPE_OBJECT = "[jsflow-shape-object]";
   const RESIZE_ANCHOR = "[jsflow-anchor]";
   const TEXT_CONTENT = "[jsflow-text-content]";
+  const TEXT_OBJECT = "[jsflow-text-object]";
 
   let pages = [];
   let pageSize = {
@@ -214,7 +215,7 @@ const jsFlow = (function (svgPanZoom, options) {
     if (!selected(`#${diagram.id}`)) return;
     const mouse = getMouse(event);
 
-    if (selected(TEXT_CONTENT)) {
+    if (selected(TEXT_OBJECT)) {
       const time = new Date().getTime();
       target = selected(SHAPE_OBJECT);
 

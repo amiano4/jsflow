@@ -18,6 +18,7 @@ const jsFlow = (function (svgPanZoom, options) {
   const RESIZE_ANCHOR = "[jsflow-anchor]";
   const TEXT_CONTENT = "[jsflow-text-content]";
   const TEXT_OBJECT = "[jsflow-text-object]";
+  const PATH_ANCHOR = "[jsflow-path-anchor]";
 
   let pages = [];
   let pageSize = {
@@ -30,8 +31,6 @@ const jsFlow = (function (svgPanZoom, options) {
   let paths = {};
   let lastClick = { time: 0 };
   let hoveredObject = null;
-
-  let controllers = [];
   let emptyClick = false;
   let node = [];
   let svgPanning = false;
@@ -215,7 +214,12 @@ const jsFlow = (function (svgPanZoom, options) {
     if (!selected(`#${diagram.id}`)) return;
     const mouse = getMouse(event);
 
-    if (selected(TEXT_OBJECT)) {
+    if (
+      /**
+       * DETECT DOUBLE CLICK FOR EDITING
+       */
+      selected(TEXT_OBJECT)
+    ) {
       const time = new Date().getTime();
       target = selected(SHAPE_OBJECT);
 
@@ -259,6 +263,18 @@ const jsFlow = (function (svgPanZoom, options) {
       svgInteractive.disablePan();
     } else if (
       /**
+       * BEGIN PATHING
+       */
+      (target = selected(SHAPE_OBJECT)) &&
+      selected(PATH_ANCHOR) &&
+      objects.hasOwnProperty(target.id)
+    ) {
+      node[0] = objects[target.id];
+      node[0].pathing = true;
+      svgInteractive.disablePan();
+      log("pathing started...");
+    } else if (
+      /**
        * AN OBJECT IS SELECTED
        */
       (target = selected(SHAPE_OBJECT))
@@ -300,11 +316,7 @@ const jsFlow = (function (svgPanZoom, options) {
        */
       node[0] instanceof Shape
     ) {
-      if (node[0].editing) {
-        node[0].stopEditing();
-        log("editing stopped");
-      }
-
+      node[0].editing && node[0].stopEditing();
       node[0].active() && node[0].handler.off();
       delete node[0];
       svgInteractive.enablePan();
@@ -532,6 +544,17 @@ const jsFlow = (function (svgPanZoom, options) {
     ) {
       node[0].transforming = false;
       node[0].update(node[0].lastState, true);
+      svgInteractive.enablePan();
+    } else if (
+      /**
+       * PATHING CLOSED
+       */
+      node[0] instanceof Shape &&
+      node[0].pathing === true
+    ) {
+      log("pathing closed...");
+      node[0].pathing = false;
+      delete node[0];
       svgInteractive.enablePan();
     }
   };

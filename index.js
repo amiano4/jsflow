@@ -300,6 +300,7 @@ const jsFlow = (function (svgPanZoom, options) {
         node[0] instanceof Shape &&
         !selected(`#${node[0].id}`)
       ) {
+        node[0].editing && node[0].stopEditing();
         node[0].handler.off();
         node[0] = target.id;
       } else if (
@@ -699,7 +700,10 @@ const jsFlow = (function (svgPanZoom, options) {
       node[0] instanceof Shape
     ) {
       if (node[0] instanceof Plotter) node[0].cancel();
-      else if (node[0].active()) node[0].handler.off();
+      else if (node[0].active()) {
+        node[0].handler.off();
+        node[0].leave();
+      }
     }
 
     node[0] = new Plotter(objectType);

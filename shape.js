@@ -110,6 +110,7 @@ class Shape {
     return this;
   }
 
+  // resizing
   transform({ x, y }) {
     const o = this.transformOrigin;
     let nx = x - o.x;

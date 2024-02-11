@@ -673,44 +673,6 @@ const jsFlow = (function (svgPanZoom, options) {
     pageSize.height = height;
   };
 
-  const addPage = function (x, y) {
-    const { width, height } = pageSize;
-    const newPage = createSVGElement("svg");
-    newPage.setAttribute("width", width);
-    newPage.setAttribute("height", height);
-    // newPage.style.backgroundColor = "red";
-    newPage.setAttribute("viewBox", `${width * x} ${height * y} ${width} ${height}`);
-
-    const rect = createSVGElement("rect");
-    rect.setAttribute("x", 0);
-    rect.setAttribute("y", 0);
-    rect.setAttribute("width", width);
-    rect.setAttribute("height", height);
-    rect.setAttribute("fill", "none");
-    rect.setAttribute("stroke", "gray");
-    rect.setAttribute("stroke-width", "1");
-    rect.setAttribute("stroke-dasharray", "10 10");
-
-    pages.push(newPage);
-
-    newPage.appendChild(rect);
-    objectsContainer.appendChild(newPage);
-  };
-
-  const setMode = function (mode) {
-    switch (mode) {
-      case "transforming":
-        controlMode = "useTransformTool";
-        // controllers[0] && controllers[0].useTransformTool();
-        break;
-      case "pathing":
-        controlMode = "usePathTool";
-      // controllers[0] && controllers[0].usePathTool();
-      default:
-        controlMode = null;
-    }
-  };
-
   const addObject = function (objectType) {
     if (
       // disable active object
@@ -734,10 +696,8 @@ const jsFlow = (function (svgPanZoom, options) {
     uniqid: randomStr,
     init,
     on,
-    addPage,
     setPageSize,
     addObject,
-    setMode,
   };
 })(svgPanZoom, {
   offset: {

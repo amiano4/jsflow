@@ -1,6 +1,6 @@
 class Shape {
   constructor() {
-    this.namespace = jsFlow.namespace || "http://www.w3.org/2000/svg";
+    this.namespace = JSFLOW_NAMESPACE;
     this.x = 0;
     this.y = 0;
     this.width = 100;

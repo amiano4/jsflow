@@ -176,15 +176,9 @@ class Shape {
     // defaulted to rectangle shape
     this.node.content.setAttribute("width", width);
     this.node.content.setAttribute("height", height);
-    // this.node.content.setAttribute("rx", width / 2);
-    // this.node.content.setAttribute("ry", height / 2);
     this.node.content.setAttribute("fill", fill);
     this.node.content.setAttribute("stroke", stroke);
     this.node.content.setAttribute("stroke-width", strokeWidth);
-
-    // text node
-    // this.node.textObject.setAttribute("width", width);
-    // this.node.textObject.setAttribute("height", height);
   }
 
   highlight() {
@@ -381,11 +375,25 @@ class Diamond extends Shape {
   updateContentElement() {
     const { width, height, fill, stroke, strokeWidth } = this.lastState;
     const points = `${width / 2} 0, ${width} ${height / 2}, ${width / 2} ${height}, 0 ${height / 2}`;
-    const size = Math.max(width, length);
 
+    this.node.textNode.style.width = width * 0.4 + "px";
     this.node.content.setAttribute("points", points);
     this.node.content.setAttribute("fill", fill);
     this.node.content.setAttribute("stroke", stroke);
     this.node.content.setAttribute("stroke-width", strokeWidth);
+  }
+
+  stopEditing() {
+    const text = this.node.textNode.innerHTML;
+    this.node.textNode.innerHTML = text.replace(/^(<br>)+|(<br>)+$/g, "");
+
+    const height = this.node.textNode.clientHeight;
+
+    if (this.height * 0.4 <= height) {
+      this.update({ height: height + height * 0.6 }, true);
+    }
+
+    this.node.textNode.removeAttribute("contenteditable");
+    this.editing = false;
   }
 }

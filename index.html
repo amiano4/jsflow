@@ -31,7 +31,6 @@
     <button type="button" data-btn-shape="Ellipse">add ellipse</button>
     <button type="button" data-btn-shape="Circle">add cicrle</button>
     <button type="button" data-btn-shape="Diamond">add diamond</button>
-    <button type="button" id="switch-mode-btn">switch mode: path</button>
     <div style="width: 250px; height: 250px; background-color: transparent">
       <img src="image.svg" alt="" />
       <svg width="400" height="400">
@@ -106,11 +105,6 @@
           const shapeType = evt.target.getAttribute("data-btn-shape");
           jsFlow.addObject(shapeType);
         });
-      });
-      document.getElementById("switch-mode-btn").addEventListener("click", function (evt) {
-        event.target.innerText = "switch mode: " + (mode ? "transform" : "path");
-        jsFlow.setMode(mode ? "pathing" : "transforming");
-        mode = !mode;
       });
     </script>
   </body>

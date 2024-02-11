@@ -224,6 +224,10 @@ class Shape {
     this.node.textNode.removeAttribute("contenteditable");
     this.editing = false;
   }
+
+  leave() {
+    this.editing && this.stopEditing();
+  }
 }
 
 class Rectangle extends Shape {

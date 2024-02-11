@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSFlow</title>
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+      }
+
+      .container {
+        height: 500px;
+        position: relative;
+      }
+
+      #diagram {
+        position: absolute;
+        inset: 0;
+        background-color: rgb(222 222 222 / 25%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="diagram"></div>
+    </div>
+    <button type="button" data-btn-shape="Rectangle">add rectangle</button>
+    <button type="button" data-btn-shape="Ellipse">add ellipse</button>
+    <button type="button" data-btn-shape="Circle">add cicrle</button>
+    <button type="button" data-btn-shape="Diamond">add diamond</button>
+    <button type="button" id="switch-mode-btn">switch mode: path</button>
+    <div style="width: 250px; height: 250px; background-color: transparent">
+      <img src="image.svg" alt="" />
+      <svg width="400" height="400">
+        <!-- Define the pattern using SVG elements -->
+        <defs>
+          <pattern id="customPattern" width="10" height="10" patternUnits="userSpaceOnUse">
+            <!-- Example: A circle -->
+            <circle cx="5" cy="5" r="5" fill="black" />
+            <!-- Example: A rectangle -->
+            <!-- <rect x="3" y="3" width="4" height="4" fill="blue" /> -->
+            <!-- Add more SVG elements as needed -->
+          </pattern>
+        </defs>
+
+        <!-- <g transform="translate(60, 70)">
+          <rect x="0" y="0" width="10" height="10" fill="url(#customPattern)"></rect>
+        </g> -->
+        <!-- <path
+          d="M 50 25 A 25 25 0 1 1 50 75 A 25 25 0 1 1 50 25"
+          fill="none"
+          stroke="#00a5ff"
+          stroke-width="0.5"
+          stroke-dasharray="3,3"
+        /> -->
+        <!-- <polygon points="0 40, 40 80, 80 40, 40 0" /> -->
+        <g>
+          <text x="50" y="50" contentEditable="true">this is my text</text>
+        </g>
+
+        <foreignObject x="20" y="20" width="160" height="160">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="display: table">
+            <div style="display: table-row">
+              <div style="overflow-wrap: break-word; width: 15em">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mollis mollis mi ut ultricies. Nullam magna
+                ipsum, porta vel dui convallis, rutrum imperdiet eros. Asliquam erat
+                volutdsdsdaddaasdsadasddsdaasaadasdshdasdpaaaasdsadaaadat.
+              </div>
+            </div>
+          </div>
+        </foreignObject>
+      </svg>
+      <div style="height: 20em; background-color: red; display: flex; align-items: center; justify-content: center">
+        <span
+          style="
+            overflow-wrap: break-word;
+            width: 7em;
+            text-align: center;
+            white-space: normal;
+            background-color: lightblue;
+          "
+        >
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mollis mollis mi ut ultricies. Nullam magna
+          ipsum, porta vel dui convallis, rutrum imperdiet eros. Asliquam erat
+          daaaasdaasdsdhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh.
+        </span>
+      </div>
+    </div>
+    <script src="plotter.js"></script>
+    <script src="hammer.js"></script>
+    <script src="handler.js"></script>
+    <script src="svg-pan-zoom.js"></script>
+    <script src="shape.js"></script>
+    <script src="index.js"></script>
+    <script>
+      jsFlow.init(document.getElementById("diagram"));
+      jsFlow.setPageSize(480, 480);
+      let mode = true;
+      // jsFlow.addPage(0, 0);
+
+      document.querySelectorAll("[data-btn-shape]").forEach((e) => {
+        e.addEventListener("click", function (evt) {
+          const shapeType = evt.target.getAttribute("data-btn-shape");
+          jsFlow.addObject(shapeType);
+        });
+      });
+      document.getElementById("switch-mode-btn").addEventListener("click", function (evt) {
+        event.target.innerText = "switch mode: " + (mode ? "transform" : "path");
+        jsFlow.setMode(mode ? "pathing" : "transforming");
+        mode = !mode;
+      });
+    </script>
+  </body>
+</html>

@@ -19,6 +19,7 @@ class Shape {
     this.transforming = false;
     this.transformOrigin = null;
     this.editing = false;
+    this.pathing = false;
 
     this.handler = new Handler();
   }

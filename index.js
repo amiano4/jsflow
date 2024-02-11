@@ -20,11 +20,6 @@ const jsFlow = (function (svgPanZoom, options) {
   const TEXT_OBJECT = "[jsflow-text-object]";
   const PATH_ANCHOR = "[jsflow-path-anchor]";
 
-  let pages = [];
-  let pageSize = {
-    width: 500,
-    height: 500,
-  };
   let svgInteractive = null;
   let pendingNode = null;
   let objects = {};
@@ -668,11 +663,6 @@ const jsFlow = (function (svgPanZoom, options) {
     userEvents[event] = callback;
   };
 
-  const setPageSize = function (width, height) {
-    pageSize.width = width;
-    pageSize.height = height;
-  };
-
   const addObject = function (objectType) {
     if (
       // disable active object
@@ -696,7 +686,6 @@ const jsFlow = (function (svgPanZoom, options) {
     uniqid: randomStr,
     init,
     on,
-    setPageSize,
     addObject,
   };
 })(svgPanZoom, {

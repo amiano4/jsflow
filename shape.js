@@ -46,6 +46,7 @@ class Shape {
     textObject.setAttribute("y", 0);
     textObject.setAttribute("width", this.width);
     textObject.setAttribute("height", this.height);
+    textObject.setAttribute("jsflow-text-object", "");
     textObject.appendChild(textBody);
 
     container.appendChild(content);
@@ -215,14 +216,16 @@ class Shape {
   }
 
   stopEditing() {
+    const text = this.node.textNode.innerHTML;
+    this.node.textNode.innerHTML = text.replace(/^(<br>)+|(<br>)+$/g, "");
+
     const height = this.node.textNode.clientHeight;
 
-    this.node.textNode.removeAttribute("contenteditable");
-
     if (this.height <= height) {
-      this.update({ height: height + 40 }, true);
+      this.update({ height: height + height * 0.2 }, true);
     }
 
+    this.node.textNode.removeAttribute("contenteditable");
     this.editing = false;
   }
 }
@@ -251,10 +254,6 @@ class Ellipse extends Shape {
     this.node.content.setAttribute("fill", fill);
     this.node.content.setAttribute("stroke", stroke);
     this.node.content.setAttribute("stroke-width", strokeWidth);
-
-    // text node
-    this.node.textObject.setAttribute("width", width);
-    this.node.textObject.setAttribute("height", height);
   }
 }
 

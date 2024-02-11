@@ -638,12 +638,6 @@ const jsFlow = (function (svgPanZoom, options) {
       center: true,
       customEventsHandler: svgInteractiveEvents,
       dblClickZoomEnabled: false,
-      // onPan: function () {
-      //   console.log("hi");
-      //   if (hoveredObject instanceof Shape) {
-      //     hoveredObject.handler.off();
-      //   }
-      // },
     });
 
     svgInteractive.setOnPan(function () {

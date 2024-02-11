@@ -67,14 +67,14 @@ const jsFlow = (function (svgPanZoom, options) {
                           display: flex;
                           align-items: center;
                           justify-content: center;`,
-    "foreignObject [jsflow-text-content]": `cursor: text;
-                          border: none !important;
+    "foreignObject [jsflow-text-content]": `border: none !important;
                           outline: none !important;
                           overflow-wrap: break-word;
                           text-align: center;
                           white-space: normal;
-                          background-color: lightblue;
+                          /* background-color: lightblue; */
                           display: inline-block;`,
+    "foreignObject [jsflow-text-content][contenteditable]": "cursor: text;",
   };
 
   const style = createSVGElement("style");

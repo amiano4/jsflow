@@ -42,7 +42,7 @@ class Handler {
     }
   }
 
-  update({ x, y, width, height }, center = false) {
+  update({ x, y, width, height }) {
     const handler = this;
     const pos = {
       nw: { x: 0, y: 0 }, // northwest
@@ -57,15 +57,6 @@ class Handler {
 
     // update border
     this.borderBox.setAttribute("d", `M 0 0 L ${width} 0 L ${width} ${height} L 0 ${height} L  0 0 Z`);
-    // update offset/position
-    if (center) {
-      const t = `translate(${x}, ${y})`;
-      // this.container.style.transform = t;
-      // this.container.setAttribute("transform", t);
-    } else {
-      this.container.style.transform = "";
-      this.container.removeAttribute("transform");
-    }
 
     Object.entries(this.anchors).forEach(([p, el]) => {
       const { x, y } = pos[p];

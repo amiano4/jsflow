@@ -269,6 +269,16 @@ const jsFlow = (function (svgPanZoom, options) {
       selected(PATH_ANCHOR) &&
       objects.hasOwnProperty(target.id)
     ) {
+      if (
+        /**
+         * REMOVE FOCUS FROM ACTIVE OBJECT
+         */
+        node[0] instanceof Shape &&
+        node[0].active()
+      ) {
+        node[0].handler.off();
+      }
+
       node[0] = objects[target.id];
       node[0].pathing = true;
       svgInteractive.disablePan();
@@ -381,6 +391,14 @@ const jsFlow = (function (svgPanZoom, options) {
         node[0].transforming !== false
       ) {
         node[0].transform({ x: mouse.x, y: mouse.y });
+        return;
+      } else if (
+        /**
+         * PATHING
+         */
+        node[0].pathing === true
+      ) {
+        log("currently pathing...");
         return;
       }
     } else if (
@@ -711,8 +729,8 @@ const jsFlow = (function (svgPanZoom, options) {
   };
 
   return {
-    namespace,
     svgInteractive,
+    shapes: objects,
     uniqid: randomStr,
     init,
     on,

@@ -48,13 +48,7 @@
         <!-- <g transform="translate(60, 70)">
           <rect x="0" y="0" width="10" height="10" fill="url(#customPattern)"></rect>
         </g> -->
-        <!-- <path
-          d="M 50 25 A 25 25 0 1 1 50 75 A 25 25 0 1 1 50 25"
-          fill="none"
-          stroke="#00a5ff"
-          stroke-width="0.5"
-          stroke-dasharray="3,3"
-        /> -->
+        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#00a5ff" stroke-width="0.5" stroke-dasharray="3,3" />
         <!-- <polygon points="0 40, 40 80, 80 40, 40 0" /> -->
         <g>
           <text x="50" y="50" contentEditable="true">this is my text</text>
@@ -90,13 +84,13 @@
     </div>
     <script src="hammer.js"></script>
     <script src="svg-pan-zoom.min.js"></script>
+    <script src="astar.js"></script>
     <script src="plotter.js"></script>
     <script src="handler.js"></script>
     <script src="shape.js"></script>
     <script src="index.js"></script>
     <script>
       jsFlow.init(document.getElementById("diagram"));
-      jsFlow.setPageSize(480, 480);
       let mode = true;
       // jsFlow.addPage(0, 0);
 

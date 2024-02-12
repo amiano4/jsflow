@@ -75,6 +75,12 @@ const aStar = (function () {
 
   // Function to reconstruct the path from goal node to start node
   function reconstructPath(node) {
+    // console.log(node);
+    node.g = Infinity; // cost from start node to current node
+    node.h = 0; // estimated cost from current node to goal node
+    node.f = Infinity; // total cost (g + h)
+    node.parent = null; // parent node
+
     let path = [];
     while (node !== null) {
       path.unshift({ x: node.x, y: node.y });
@@ -84,7 +90,7 @@ const aStar = (function () {
   }
 
   // Function to get neighboring nodes of a given node
-  function getNeighbors(node, grid) {
+  function getNeighbors(node, { grid, rows, cols }) {
     let neighbors = [];
     let directions = [
       { dx: 0, dy: -1 },
@@ -96,7 +102,13 @@ const aStar = (function () {
     for (let dir of directions) {
       let newX = node.x + dir.dx;
       let newY = node.y + dir.dy;
-      if (newX >= 0 && newX < grid.length && newY >= 0 && newY < grid[0].length) {
+      if (newX >= 0 && newX < rows && newY >= 0 && newY < cols) {
+        !grid[newX] && (grid[newX] = []);
+
+        if (!(grid[newX][newY] instanceof Node)) {
+          grid[newX][newY] = new Node(newX, newY, true);
+        }
+
         neighbors.push(grid[newX][newY]);
       }
     }

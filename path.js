@@ -7,19 +7,24 @@ class Path {
     this.color = "#000"; // default (black)
     this.thickness = 1;
 
-    this.node = document.createElementNS(JSFLOW_NAMESPACE, "path");
-    this.variant({ type });
+    this.node = {
+      g: document.createElementNS(JSFLOW_NAMESPACE, "g"),
+      path: document.createElementNS(JSFLOW_NAMESPACE, "path"),
+    };
+
+    this.node.g.append(this.node.path);
+    this.updateSettings({ type });
   }
 
-  variant({ type, color, thickness }) {
+  updateSettings({ type, color, thickness }) {
     type = type || this.type;
 
     if (type === "dashed") {
-      this.node.setAttribute("stroke-dasharray", "5,3");
+      this.node.path.setAttribute("stroke-dasharray", "5,3");
     } else if (type === "dotted") {
-      this.node.setAttribute("stroke-dasharray", "2,2");
+      this.node.path.setAttribute("stroke-dasharray", "2,2");
     } else if (type === "solid") {
-      this.node.removeAttribute("stroke-dasharray");
+      this.node.path.removeAttribute("stroke-dasharray");
     } else {
       console.error("Invalid path type.");
       return;
@@ -29,8 +34,8 @@ class Path {
     this.color = color || this.color;
     this.thickness = thickness || this.thickness;
 
-    this.node.setAttribute("stroke", this.color);
-    this.node.setAttribute("stroke-width", this.thickness);
+    this.node.path.setAttribute("stroke", this.color);
+    this.node.path.setAttribute("stroke-width", this.thickness);
     return this;
   }
 

@@ -1,4 +1,4 @@
-const jsFlow = (function (svgPanZoom, aStar) {
+const jsFlow = (function (svgPanZoom, aStar, PF) {
   window.JSFLOW_NAMESPACE = "http://www.w3.org/2000/svg";
   window.JSFLOW_VERTEX_SIZE = 8;
   window.JSFLOW_MIN_PLOTTER_SIZE = 50;
@@ -11,6 +11,7 @@ const jsFlow = (function (svgPanZoom, aStar) {
   window.JSFLOW_GRID_SIZE = 16;
   window.JSFLOW_GRID_GROUP_SIZE = 80;
   window.JSFLOW_GRID_COLOR = "#ccc";
+  window.JSFLOW_GRID_MATRIX = JSFLOW_GRID_HEIGHT / JSFLOW_GRID_SIZE;
 
   const userEvents = {};
 
@@ -135,27 +136,47 @@ const jsFlow = (function (svgPanZoom, aStar) {
   wrapper.appendChild(pathsContainer);
   wrapper.appendChild(objectsContainer);
 
+  const finder = new PF.BiAStarFinder({
+    allowDiagonal: false,
+    dontCrossCorners: true,
+    heuristic: PF.Heuristic["manhattan"],
+    weight: 1,
+  });
+
+  const fSize = JSFLOW_GRID_HEIGHT / JSFLOW_GRID_SIZE;
+  const fGrid = new PF.Grid(fSize, fSize);
+
   // prototyping
   aStar.grid = [];
   aStar.rows = 0;
   aStar.columns = 0;
   aStar.path = (source, destination) => {
-    const sourceNode = aStar.toNode(source);
-    const destinationNode = aStar.toNode(destination);
-    const shortestPath = aStar.find(sourceNode, destinationNode, aStar.grid);
+    const sourceNode = new aStar.Node(source.x, source.y, true);
+    const destinationNode = new aStar.Node(destination.x, destination.y, true);
+
+    aStar.grid[source.y] = [];
+    aStar.grid[destination.y] = [];
+    aStar.grid[source.y][source.x] = sourceNode;
+    aStar.grid[destination.y][destination.x] = destinationNode;
+
+    const shortestPath = aStar.find(sourceNode, destinationNode, {
+      grid: aStar.grid,
+      rows: aStar.rows,
+      cols: aStar.columns,
+    });
     return shortestPath;
   };
 
   aStar.toNode = (object) => {
-    let { x, y } = objectsContainer.getBoundingClientRect();
-    let o = object.node.container.getBoundingClientRect();
+    // let { x, y } = objectsContainer.getBoundingClientRect();
+    // let o = object.node.container.getBoundingClientRect();
 
-    x = Math.max(0, Math.floor((o.x - x) / JSFLOW_GRID_SIZE));
-    y = Math.max(0, Math.floor((o.y - y) / JSFLOW_GRID_SIZE));
+    // x = Math.max(0, Math.floor((o.x - x) / JSFLOW_GRID_SIZE));
+    // y = Math.max(0, Math.floor((o.y - y) / JSFLOW_GRID_SIZE));
 
-    console.log(x, y);
+    // console.log(x, y);
 
-    return new aStar.Node(x, y, false);
+    return new aStar.Node(x, y, true);
   };
 
   Shape.prototype.register = function () {
@@ -164,27 +185,70 @@ const jsFlow = (function (svgPanZoom, aStar) {
     aStar.grid = [];
     aStar.rows = 0;
     aStar.columns = 0;
+
     for (let obj of Object.values(objects)) {
-      let o = obj.node.container.getBoundingClientRect();
-      let x = o.x - cx;
-      let y = o.y - cy;
+      let x = Math.round((obj.x + JSFLOW_GRID_WIDTH / 2) / JSFLOW_GRID_SIZE);
+      let y = Math.round((obj.y + JSFLOW_GRID_HEIGHT / 2) / JSFLOW_GRID_SIZE);
+      let width = Math.round(obj.width / JSFLOW_GRID_SIZE);
+      let height = Math.round(obj.height / JSFLOW_GRID_SIZE);
 
-      const gridX = Math.floor(x / JSFLOW_GRID_SIZE);
-      const gridY = Math.floor(y / JSFLOW_GRID_SIZE);
-      const gridWidth = Math.ceil(obj.width / JSFLOW_GRID_SIZE);
-      const gridHeight = Math.ceil(obj.height / JSFLOW_GRID_SIZE);
-      // console.log(gridX, gridY);
-
-      aStar.rows = Math.max(aStar.rows, gridHeight + gridY);
-      aStar.columns = Math.max(aStar.columns, gridWidth + gridX);
-
-      for (let j = gridY; j < gridY + gridHeight; j++) {
-        !aStar.grid[j] && (aStar.grid[j] = []);
-        for (let i = gridX; i < gridX + gridWidth; i++) {
-          aStar.grid[j][i] = new aStar.Node(x, y, false);
+      console.log(x, y, x + width, y + height);
+      for (let row = y; row < y + height; row++) {
+        // aStar.grid[row] === undefined && (aStar.grid[row] = []);
+        for (let col = x; col < x + width; col++) {
+          // aStar.grid[row][col] = 0;
+          fGrid.setWalkableAt(row, col, false);
         }
       }
+
+      Object.entries(obj.getPathPoints()).forEach(([k, v]) => {
+        obj.ports[k] = {
+          x: Math.round((v.x + obj.x + JSFLOW_GRID_WIDTH / 2) / JSFLOW_GRID_SIZE),
+          y: Math.round((v.y + obj.y + JSFLOW_GRID_HEIGHT / 2) / JSFLOW_GRID_SIZE),
+        };
+
+        const b = obj.ports[k].x;
+        const a = obj.ports[k].y;
+
+        aStar.grid[a] === undefined && (aStar.grid[a] = []);
+        aStar.grid[a][b] = 1;
+        fGrid.setWalkableAt(b, a, false);
+      });
+      console.log(obj.ports);
     }
+
+    // for (let obj of Object.values(objects)) {
+    //   let o = obj.node.container.getBoundingClientRect();
+    //   let x = o.x - cx;
+    //   let y = o.y - cy;
+
+    //   const gridX = Math.round(x / JSFLOW_GRID_SIZE);
+    //   const gridY = Math.round(y / JSFLOW_GRID_SIZE);
+    //   const gridWidth = Math.round(obj.width / JSFLOW_GRID_SIZE);
+    //   const gridHeight = Math.round(obj.height / JSFLOW_GRID_SIZE);
+
+    //   Object.entries(obj.getPathPoints()).forEach(([k, v]) => {
+    //     obj.ports[k] = {
+    //       x: Math.round(v.x / JSFLOW_GRID_SIZE + gridX),
+    //       y: Math.round(v.y / JSFLOW_GRID_SIZE + gridY),
+    //     };
+    //   });
+
+    //   const dx = gridWidth + gridX;
+    //   const dy = gridHeight + gridY;
+
+    //   aStar.rows = Math.max(aStar.rows, dy + 5);
+    //   aStar.columns = Math.max(aStar.columns, dx + 5);
+
+    //   for (let j = gridY; j < dy + 5; j++) {
+    //     !aStar.grid[j + 5] && (aStar.grid[j + 5] = []);
+    //     for (let i = gridX; i < dx + 5; i++) {
+    //       if (j < dy && i < dx) {
+    //         aStar.grid[j + 5][i + 5] = 1;
+    //       }
+    //     }
+    //   }
+    // }
   };
 
   aStar.drawGrid = function () {
@@ -194,7 +258,7 @@ const jsFlow = (function (svgPanZoom, aStar) {
       !y && (aStar.grid[i] = []);
       for (let j = 0; j < aStar.grid[i].length; j++) {
         // Display '+' if true, '-' if false
-        rowString += aStar.grid[i][j] === 1 ? "+ " : "- ";
+        rowString += aStar.grid[i][j] === 1 || aStar.grid[i][j] === undefined ? "-" : "+";
       }
       rowString += "\n";
     }
@@ -650,23 +714,51 @@ const jsFlow = (function (svgPanZoom, aStar) {
         node[0].id !== target.id &&
         objects.hasOwnProperty(target.id)
       ) {
-        const s = node[0].getPathPoint();
-        const d = objects[target.id].getPathPoint(des.getAttribute("jsflow-path-anchor"));
+        let source = node[0].ports[node[0].pathing];
+        let destination = objects[target.id].ports[des.getAttribute("jsflow-path-anchor")];
 
-        const p = aStar.find(sourceNode, destinationNode, aStar.grid);
+        const src = source; //[source.x, source.y];
+        const dest = destination; // [destination.x, destination.y];
 
+        const s = JSFLOW_GRID_WIDTH / JSFLOW_GRID_SIZE;
+
+        // aStarSearch(aStar.grid, src, dest, s, s);
+        console.log(src, dest);
+
+        const p = finder.findPath(src.x, src.y, dest.x, dest.y, fGrid);
+
+        const line = createSVGElement("path");
+        line.setAttribute("stroke", "black");
+        line.setAttribute("stroke-width", "1");
+
+        let d = ``;
+        console.log(p);
+
+        p[0];
+        // source = new aStar.Node(source.x, source.y, true);
+        // destination = new aStar.Node(destination.x, destination.y, true);
+
+        // aStar.grid[source.y][source.x] = source;
+        // aStar.grid[destination.y][destination.x] = destination;
+
+        // console.log(aStar.grid[source.y][source.x], aStar.grid[destination.y][destination.x]);
+
+        // const p = aStar.path(source, destination);
+
+        // // console.log(source, destination);
+        // console.log(p);
         // const path = aStar.path(s, d);
 
-        let { x, y } = objectsContainer.getBoundingClientRect();
+        // let { x, y } = objectsContainer.getBoundingClientRect();
 
-        let x1 = Math.max(0, Math.floor((s.x - x) / JSFLOW_GRID_SIZE));
-        let y1 = Math.max(0, Math.floor((s.y - y) / JSFLOW_GRID_SIZE));
-        let x2 = Math.max(0, Math.floor((d.x - x) / JSFLOW_GRID_SIZE));
-        let y2 = Math.max(0, Math.floor((d.y - y) / JSFLOW_GRID_SIZE));
+        // let x1 = Math.max(0, Math.floor((s.x - x) / JSFLOW_GRID_SIZE));
+        // let y1 = Math.max(0, Math.floor((s.y - y) / JSFLOW_GRID_SIZE));
+        // let x2 = Math.max(0, Math.floor((d.x - x) / JSFLOW_GRID_SIZE));
+        // let y2 = Math.max(0, Math.floor((d.y - y) / JSFLOW_GRID_SIZE));
 
         // console.log(`(${x1}, ${y1}) -> (${x2}, ${y2})`);
 
-        // aStarSearch(aStar.grid, [x1, y1], [x2, y2], aStar.rows, aStar.columns);
+        // aStarSearch(aStar.grid, [source.x, source.y], [destination.x, destination.y], aStar.rows, aStar.columns);
 
         // console.log(path);
       }
@@ -811,4 +903,4 @@ const jsFlow = (function (svgPanZoom, aStar) {
     on,
     addObject,
   };
-})(svgPanZoom, aStar);
+})(svgPanZoom, aStar, PF);

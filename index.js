@@ -1,11 +1,4 @@
-const jsFlow = (function (svgPanZoom, options) {
-  const namespace = "http://www.w3.org/2000/svg";
-  const gridSize = 16;
-  const gridGroupSize = 80;
-  const gridColor = "#ccc";
-  const userEvents = {};
-  const gridOrigin = { x: 5000, y: 5000 };
-
+const jsFlow = (function (svgPanZoom, aStar) {
   window.JSFLOW_NAMESPACE = "http://www.w3.org/2000/svg";
   window.JSFLOW_VERTEX_SIZE = 8;
   window.JSFLOW_MIN_PLOTTER_SIZE = 50;
@@ -13,6 +6,13 @@ const jsFlow = (function (svgPanZoom, options) {
   window.JSFLOW_FONT_SIZE = 12;
   window.JSFLOW_FONT_FACE = "Arial";
   window.JSFLOW_PLACEHOLDER_TEXT = "Text here";
+  window.JSFLOW_GRID_WIDTH = 10000;
+  window.JSFLOW_GRID_HEIGHT = 10000;
+  window.JSFLOW_GRID_SIZE = 16;
+  window.JSFLOW_GRID_GROUP_SIZE = 80;
+  window.JSFLOW_GRID_COLOR = "#ccc";
+
+  const userEvents = {};
 
   const SHAPE_OBJECT = "[jsflow-shape-object]";
   const RESIZE_ANCHOR = "[jsflow-anchor]";
@@ -82,35 +82,35 @@ const jsFlow = (function (svgPanZoom, options) {
 
   // pattern for a small square/grid
   const pattern1 = createSVGElement("pattern");
-  pattern1.setAttribute("width", gridSize);
-  pattern1.setAttribute("height", gridSize);
+  pattern1.setAttribute("width", JSFLOW_GRID_SIZE);
+  pattern1.setAttribute("height", JSFLOW_GRID_SIZE);
   pattern1.setAttribute("patternUnits", "userSpaceOnUse");
 
   // grid path
   const miniGrid = createSVGElement("path");
   miniGrid.setAttribute("fill", "none");
-  miniGrid.setAttribute("stroke", gridColor);
+  miniGrid.setAttribute("stroke", JSFLOW_GRID_COLOR);
   miniGrid.setAttribute("stroke-width", "0.5");
-  miniGrid.setAttribute("d", `M ${gridSize} 0 L 0 0 0 ${gridSize}`);
+  miniGrid.setAttribute("d", `M ${JSFLOW_GRID_SIZE} 0 L 0 0 0 ${JSFLOW_GRID_SIZE}`);
 
   pattern1.appendChild(miniGrid);
 
   // bigger squares (pattern)
   const pattern2 = createSVGElement("pattern");
-  pattern2.setAttribute("width", gridGroupSize);
-  pattern2.setAttribute("height", gridGroupSize);
+  pattern2.setAttribute("width", JSFLOW_GRID_GROUP_SIZE);
+  pattern2.setAttribute("height", JSFLOW_GRID_GROUP_SIZE);
   pattern2.setAttribute("patternUnits", "userSpaceOnUse");
 
   const gridRect = createSVGElement("rect");
-  gridRect.setAttribute("width", gridGroupSize);
-  gridRect.setAttribute("height", gridGroupSize);
+  gridRect.setAttribute("width", JSFLOW_GRID_GROUP_SIZE);
+  gridRect.setAttribute("height", JSFLOW_GRID_GROUP_SIZE);
   gridRect.setAttribute("fill", `url(#${pattern1.id})`);
 
   // Create the path for the second pattern
   const gridPath = createSVGElement("path");
-  gridPath.setAttribute("d", `M ${gridGroupSize} 0 L 0 0 0 ${gridGroupSize}`);
+  gridPath.setAttribute("d", `M ${JSFLOW_GRID_GROUP_SIZE} 0 L 0 0 0 ${JSFLOW_GRID_GROUP_SIZE}`);
   gridPath.setAttribute("fill", "none");
-  gridPath.setAttribute("stroke", gridColor);
+  gridPath.setAttribute("stroke", JSFLOW_GRID_COLOR);
   gridPath.setAttribute("stroke-width", "1");
 
   pattern2.appendChild(gridRect);
@@ -121,10 +121,10 @@ const jsFlow = (function (svgPanZoom, options) {
 
   const grid = createSVGElement("rect");
   grid.setAttribute("fill", `url(#${pattern2.id})`);
-  grid.setAttribute("x", -gridOrigin.x);
-  grid.setAttribute("y", -gridOrigin.y);
-  grid.setAttribute("width", 10000);
-  grid.setAttribute("height", 10000);
+  grid.setAttribute("x", -(JSFLOW_GRID_WIDTH / 2));
+  grid.setAttribute("y", -(JSFLOW_GRID_HEIGHT / 2));
+  grid.setAttribute("width", JSFLOW_GRID_WIDTH);
+  grid.setAttribute("height", JSFLOW_GRID_HEIGHT);
 
   // others
 
@@ -133,6 +133,55 @@ const jsFlow = (function (svgPanZoom, options) {
   wrapper.appendChild(grid);
   wrapper.appendChild(pathsContainer);
   wrapper.appendChild(objectsContainer);
+
+  // prototyping
+  aStar.grid = [];
+  aStar.path = (source, destination) => {
+    const sourceNode = aStar.toNode(source);
+    const destinationNode = aStar.toNode(destination);
+    const shortestPath = aStar.find(sourceNode, destinationNode, aStar.grid);
+    return shortestPath;
+  };
+
+  aStar.toNode = (object) => {
+    const x = Math.floor(object.x / JSFLOW_GRID_SIZE); // Assuming JSFLOW_GRID_SIZE is defined somewhere
+    const y = Math.floor(object.y / JSFLOW_GRID_SIZE); // Assuming JSFLOW_GRID_SIZE is defined somewhere
+    return new aStar.Node(x, y, true); // Assuming the object is passable
+  };
+
+  aStar.updateGrid = () => {
+    aStar.grid = [];
+
+    for (let obj of Object.values(objects)) {
+      for (let [x, y] of obj.blocks) {
+        !aStar.grid[x] && (aStar.grid[x] = []);
+        !aStar.grid[x][y] && (aStar.grid[x][y] = {});
+        aStar.grid[x][y].isPassable = true;
+      }
+    }
+  };
+
+  Shape.prototype.register = function () {
+    let { x, y } = objectsContainer.getBoundingClientRect();
+    x = this.x - x;
+    y = this.y - y;
+
+    const gridX = Math.floor(x / JSFLOW_GRID_SIZE);
+    const gridY = Math.floor(y / JSFLOW_GRID_SIZE);
+    const gridWidth = Math.ceil(this.width / JSFLOW_GRID_SIZE);
+    const gridHeight = Math.ceil(this.height / JSFLOW_GRID_SIZE);
+    const t = [];
+
+    // // Mark cells
+    for (let i = gridX; i < gridX + gridWidth; i++) {
+      for (let j = gridY; j < gridY + gridHeight; j++) {
+        t.push([i, j]);
+      }
+    }
+
+    this.blocks = t;
+    aStar.updateGrid();
+  };
 
   // beginning of mouse events
   const svgInteractiveEvents = {
@@ -498,21 +547,22 @@ const jsFlow = (function (svgPanZoom, options) {
       const width = node[0].width;
       const height = node[0].height;
       const shapeType = node[0].toShape();
+      const snapped = snapToGrid({ x, y, width, height });
       let obj = false;
 
       node[0].node.remove();
       switch (shapeType) {
         case "Rectangle":
-          obj = new Rectangle({ x, y, width, height });
+          obj = new Rectangle(snapped);
           break;
         case "Ellipse":
-          obj = new Ellipse({ x, y, width, height });
+          obj = new Ellipse(snapped);
           break;
         case "Circle":
-          obj = new Circle({ x, y, width, height });
+          obj = new Circle(snapped);
           break;
         case "Diamond":
-          obj = new Diamond({ x, y, width, height });
+          obj = new Diamond(snapped);
           break;
       }
 
@@ -535,7 +585,8 @@ const jsFlow = (function (svgPanZoom, options) {
       node[0].dragging === true
     ) {
       node[0].dragging = false;
-      node[0].update(node[0].lastState, true);
+      node[0].update(snapToGrid(node[0].lastState), true);
+      node[0].register();
       svgInteractive.enablePan();
     } else if (
       /**
@@ -557,7 +608,7 @@ const jsFlow = (function (svgPanZoom, options) {
       node[0].transforming !== false
     ) {
       node[0].transforming = false;
-      node[0].update(node[0].lastState, true);
+      node[0].update(snapToGrid(node[0].lastState), true);
       svgInteractive.enablePan();
     } else if (
       /**
@@ -585,7 +636,7 @@ const jsFlow = (function (svgPanZoom, options) {
   // regular functions
   function createSVGElement(element, hasId = true) {
     window.JSFLOW_ELEMENT_COUNT = window.JSFLOW_ELEMENT_COUNT ? window.JSFLOW_ELEMENT_COUNT + 1 : 1;
-    const newEl = document.createElementNS(namespace, element);
+    const newEl = document.createElementNS(JSFLOW_NAMESPACE, element);
     hasId && newEl.setAttribute("id", randomStr(8, "jsflow-obj" + window.JSFLOW_ELEMENT_COUNT));
     return newEl;
   }
@@ -636,6 +687,17 @@ const jsFlow = (function (svgPanZoom, options) {
     mouse.y /= mouse.scale;
     return mouse;
   }
+
+  function snapToGrid(options) {
+    const { x, y, width, height } = options;
+    options.x = Math.round(x / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+    options.y = Math.round(y / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+    options.width = Math.ceil(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+    options.height = Math.ceil(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+    return options;
+  }
+
+  function updateBlocks(shape) {}
 
   // variable functions
   const init = function (element) {
@@ -688,9 +750,4 @@ const jsFlow = (function (svgPanZoom, options) {
     on,
     addObject,
   };
-})(svgPanZoom, {
-  offset: {
-    x: 0,
-    y: 0,
-  },
-});
+})(svgPanZoom, aStar);

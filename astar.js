@@ -1,4 +1,6 @@
 const aStar = (function () {
+  // let gridSize = 16;
+
   class Node {
     constructor(x, y, isPassable) {
       this.x = x;
@@ -41,10 +43,11 @@ const aStar = (function () {
 
       // Get neighbors of current node
       let neighbors = getNeighbors(current, grid);
+      // console.log(neighbors);
 
       for (let neighbor of neighbors) {
         // Skip neighbor if it's impassable or already in the closed set
-        if (!neighbor || !neighbor.isPassable || closedSet.includes(neighbor)) {
+        if (!neighbor.isPassable || closedSet.includes(neighbor)) {
           continue;
         }
 

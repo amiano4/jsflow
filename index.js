@@ -29,6 +29,7 @@ const jsFlow = (function (svgPanZoom, aStar) {
   let emptyClick = false;
   let node = [];
   let svgPanning = false;
+  let isPathing = false;
 
   const diagram = createSVGElement("svg");
   const wrapper = createSVGElement("g");
@@ -136,6 +137,8 @@ const jsFlow = (function (svgPanZoom, aStar) {
 
   // prototyping
   aStar.grid = [];
+  aStar.rows = 0;
+  aStar.columns = 0;
   aStar.path = (source, destination) => {
     const sourceNode = aStar.toNode(source);
     const destinationNode = aStar.toNode(destination);
@@ -144,43 +147,58 @@ const jsFlow = (function (svgPanZoom, aStar) {
   };
 
   aStar.toNode = (object) => {
-    const x = Math.floor(object.x / JSFLOW_GRID_SIZE); // Assuming JSFLOW_GRID_SIZE is defined somewhere
-    const y = Math.floor(object.y / JSFLOW_GRID_SIZE); // Assuming JSFLOW_GRID_SIZE is defined somewhere
-    return new aStar.Node(x, y, true); // Assuming the object is passable
-  };
+    let { x, y } = objectsContainer.getBoundingClientRect();
+    let o = object.node.container.getBoundingClientRect();
 
-  aStar.updateGrid = () => {
-    aStar.grid = [];
+    x = Math.max(0, Math.floor((o.x - x) / JSFLOW_GRID_SIZE));
+    y = Math.max(0, Math.floor((o.y - y) / JSFLOW_GRID_SIZE));
 
-    for (let obj of Object.values(objects)) {
-      for (let [x, y] of obj.blocks) {
-        !aStar.grid[x] && (aStar.grid[x] = []);
-        !aStar.grid[x][y] && (aStar.grid[x][y] = {});
-        aStar.grid[x][y].isPassable = true;
-      }
-    }
+    console.log(x, y);
+
+    return new aStar.Node(x, y, false);
   };
 
   Shape.prototype.register = function () {
-    let { x, y } = objectsContainer.getBoundingClientRect();
-    x = this.x - x;
-    y = this.y - y;
+    let { x: cx, y: cy } = objectsContainer.getBoundingClientRect();
 
-    const gridX = Math.floor(x / JSFLOW_GRID_SIZE);
-    const gridY = Math.floor(y / JSFLOW_GRID_SIZE);
-    const gridWidth = Math.ceil(this.width / JSFLOW_GRID_SIZE);
-    const gridHeight = Math.ceil(this.height / JSFLOW_GRID_SIZE);
-    const t = [];
+    aStar.grid = [];
+    aStar.rows = 0;
+    aStar.columns = 0;
+    for (let obj of Object.values(objects)) {
+      let o = obj.node.container.getBoundingClientRect();
+      let x = o.x - cx;
+      let y = o.y - cy;
 
-    // // Mark cells
-    for (let i = gridX; i < gridX + gridWidth; i++) {
+      const gridX = Math.floor(x / JSFLOW_GRID_SIZE);
+      const gridY = Math.floor(y / JSFLOW_GRID_SIZE);
+      const gridWidth = Math.ceil(obj.width / JSFLOW_GRID_SIZE);
+      const gridHeight = Math.ceil(obj.height / JSFLOW_GRID_SIZE);
+      // console.log(gridX, gridY);
+
+      aStar.rows = Math.max(aStar.rows, gridHeight + gridY);
+      aStar.columns = Math.max(aStar.columns, gridWidth + gridX);
+
       for (let j = gridY; j < gridY + gridHeight; j++) {
-        t.push([i, j]);
+        !aStar.grid[j] && (aStar.grid[j] = []);
+        for (let i = gridX; i < gridX + gridWidth; i++) {
+          aStar.grid[j][i] = new aStar.Node(x, y, false);
+        }
       }
     }
+  };
 
-    this.blocks = t;
-    aStar.updateGrid();
+  aStar.drawGrid = function () {
+    let rowString = "";
+    for (let i = 0; i < aStar.grid.length; i++) {
+      let y = aStar.grid[i];
+      !y && (aStar.grid[i] = []);
+      for (let j = 0; j < aStar.grid[i].length; j++) {
+        // Display '+' if true, '-' if false
+        rowString += aStar.grid[i][j] === 1 ? "+ " : "- ";
+      }
+      rowString += "\n";
+    }
+    console.log(rowString);
   };
 
   // beginning of mouse events
@@ -324,8 +342,9 @@ const jsFlow = (function (svgPanZoom, aStar) {
       }
 
       node[0] = objects[target.id];
-      node[0].pathing = true;
+      node[0].pathing = selected(PATH_ANCHOR).getAttribute("jsflow-path-anchor");
       svgInteractive.disablePan();
+      enablePathing();
       log("pathing started...");
     } else if (
       /**
@@ -440,7 +459,7 @@ const jsFlow = (function (svgPanZoom, aStar) {
         /**
          * PATHING
          */
-        node[0].pathing === true
+        node[0].pathing !== false
       ) {
         log("currently pathing...");
         return;
@@ -547,7 +566,7 @@ const jsFlow = (function (svgPanZoom, aStar) {
       const width = node[0].width;
       const height = node[0].height;
       const shapeType = node[0].toShape();
-      const snapped = snapToGrid({ x, y, width, height });
+      const snapped = { x, y, width, height };
       let obj = false;
 
       node[0].node.remove();
@@ -573,6 +592,7 @@ const jsFlow = (function (svgPanZoom, aStar) {
         // save to array
         objects[obj.id] = obj;
         objectsContainer.appendChild(obj.node.container);
+        obj.register();
       } else {
         delete node[0];
         svgInteractive.enablePan();
@@ -585,7 +605,7 @@ const jsFlow = (function (svgPanZoom, aStar) {
       node[0].dragging === true
     ) {
       node[0].dragging = false;
-      node[0].update(snapToGrid(node[0].lastState), true);
+      node[0].update(node[0].lastState, true);
       node[0].register();
       svgInteractive.enablePan();
     } else if (
@@ -608,16 +628,49 @@ const jsFlow = (function (svgPanZoom, aStar) {
       node[0].transforming !== false
     ) {
       node[0].transforming = false;
-      node[0].update(snapToGrid(node[0].lastState), true);
+      node[0].update(node[0].lastState, true);
+      node[0].register();
       svgInteractive.enablePan();
     } else if (
       /**
        * PATHING CLOSED
        */
       node[0] instanceof Shape &&
-      node[0].pathing === true
+      node[0].pathing !== false
     ) {
-      log("pathing closed...");
+      log("pathing closed...", node[0].pathing);
+
+      let des = null;
+      if (
+        /**
+         * DESTINATION SET
+         */
+        (target = selected(SHAPE_OBJECT)) &&
+        (des = selected(PATH_ANCHOR)) &&
+        node[0].id !== target.id &&
+        objects.hasOwnProperty(target.id)
+      ) {
+        const s = node[0].getPathPoint();
+        const d = objects[target.id].getPathPoint(des.getAttribute("jsflow-path-anchor"));
+
+        const p = aStar.find(sourceNode, destinationNode, aStar.grid);
+
+        // const path = aStar.path(s, d);
+
+        let { x, y } = objectsContainer.getBoundingClientRect();
+
+        let x1 = Math.max(0, Math.floor((s.x - x) / JSFLOW_GRID_SIZE));
+        let y1 = Math.max(0, Math.floor((s.y - y) / JSFLOW_GRID_SIZE));
+        let x2 = Math.max(0, Math.floor((d.x - x) / JSFLOW_GRID_SIZE));
+        let y2 = Math.max(0, Math.floor((d.y - y) / JSFLOW_GRID_SIZE));
+
+        // console.log(`(${x1}, ${y1}) -> (${x2}, ${y2})`);
+
+        // aStarSearch(aStar.grid, [x1, y1], [x2, y2], aStar.rows, aStar.columns);
+
+        // console.log(path);
+      }
+
       node[0].pathing = false;
       delete node[0];
       svgInteractive.enablePan();
@@ -688,16 +741,24 @@ const jsFlow = (function (svgPanZoom, aStar) {
     return mouse;
   }
 
-  function snapToGrid(options) {
-    const { x, y, width, height } = options;
-    options.x = Math.round(x / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-    options.y = Math.round(y / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-    options.width = Math.ceil(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-    options.height = Math.ceil(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-    return options;
+  function enablePathing() {
+    Object.entries(objects).forEach(([id, obj]) => {
+      if (node[0] instanceof Shape && node[0].id !== id) {
+        obj.handler.usePathTool();
+        obj.highlight();
+      }
+    });
+    isPathing = true;
   }
 
-  function updateBlocks(shape) {}
+  function disablePathing() {
+    Object.entries(objects).forEach(([id, obj]) => {
+      if (node[0] instanceof Shape && node[0].id !== id && obj.active()) {
+        obj.handler.off();
+      }
+    });
+    isPathing = false;
+  }
 
   // variable functions
   const init = function (element) {

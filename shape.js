@@ -21,6 +21,7 @@ class Shape {
     this.editing = false;
     this.pathing = false;
     this.blocks = [];
+    this.ports = {};
 
     this.handler = new Handler();
   }
@@ -64,6 +65,13 @@ class Shape {
     }
 
     let { x, y, height, width, fill, stroke, strokeWidth } = ops;
+
+    if (lock) {
+      x = Math.round(x / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      y = Math.round(y / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      width = Math.ceil(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      height = Math.ceil(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+    }
 
     x = x || this.x;
     y = y || this.y;
@@ -229,6 +237,23 @@ class Shape {
   leave() {
     this.editing && this.stopEditing();
   }
+
+  getPathPoint(anchor = false) {
+    const { width, height, x, y } = this.lastState;
+    const pos = {
+      n: { x: width / 2, y: 0 }, // north
+      e: { x: width, y: height / 2 }, // east
+      w: { x: 0, y: height / 2 }, // west
+      s: { x: width / 2, y: height }, // south
+    };
+
+    anchor = anchor === false ? this.pathing : anchor;
+    if (!pos[anchor]) return;
+    pos[anchor].x += x;
+    pos[anchor].y += y;
+
+    return pos[anchor];
+  }
 }
 
 class Rectangle extends Shape {
@@ -275,6 +300,13 @@ class Circle extends Shape {
     }
 
     let { x, y, height, width, fill, stroke, strokeWidth } = ops;
+
+    if (lock) {
+      x = Math.round(x / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      y = Math.round(y / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      width = Math.ceil(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      height = Math.ceil(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+    }
 
     x = x || this.x;
     y = y || this.y;

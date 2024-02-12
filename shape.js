@@ -20,6 +20,7 @@ class Shape {
     this.transformOrigin = null;
     this.editing = false;
     this.pathing = false;
+    this.blocks = [];
 
     this.handler = new Handler();
   }

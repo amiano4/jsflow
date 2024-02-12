@@ -42,7 +42,7 @@ class Handler {
     }
   }
 
-  update({ x, y, width, height }) {
+  update({ width, height }) {
     const handler = this;
     const pos = {
       nw: { x: 0, y: 0 }, // northwest

@@ -69,8 +69,8 @@ class Shape {
     if (lock) {
       x = Math.round(x / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
       y = Math.round(y / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-      width = Math.ceil(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-      height = Math.ceil(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      width = Math.round(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      height = Math.round(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
     }
 
     x = x || this.x;
@@ -238,21 +238,14 @@ class Shape {
     this.editing && this.stopEditing();
   }
 
-  getPathPoint(anchor = false) {
+  getPathPoints() {
     const { width, height, x, y } = this.lastState;
-    const pos = {
+    return {
       n: { x: width / 2, y: 0 }, // north
       e: { x: width, y: height / 2 }, // east
       w: { x: 0, y: height / 2 }, // west
       s: { x: width / 2, y: height }, // south
     };
-
-    anchor = anchor === false ? this.pathing : anchor;
-    if (!pos[anchor]) return;
-    pos[anchor].x += x;
-    pos[anchor].y += y;
-
-    return pos[anchor];
   }
 }
 
@@ -304,8 +297,8 @@ class Circle extends Shape {
     if (lock) {
       x = Math.round(x / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
       y = Math.round(y / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-      width = Math.ceil(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
-      height = Math.ceil(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      width = Math.round(width / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
+      height = Math.round(height / JSFLOW_GRID_SIZE) * JSFLOW_GRID_SIZE;
     }
 
     x = x || this.x;

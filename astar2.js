@@ -23,7 +23,7 @@ class cell {
 function isValid(row, col) {
   // Returns true if row number and column number
   // is in range
-  console.log(row, col);
+  // console.log(row, col);
   return row >= 0 && row < ROW && col >= 0 && col < COL;
 }
 
@@ -31,6 +31,12 @@ function isValid(row, col) {
 // blocked or not
 function isUnBlocked(grid, row, col) {
   // Returns true if the cell is not blocked else false
+  // console.log(row, col);
+
+  // if (grid[row][col] === undefined) {
+  //   grid[row][col] = new aStar.Node(row, col, true);
+  // }
+  // console.log(grid[row][/col]);
   if (grid[row][col] == 1) return true;
   else return false;
 }

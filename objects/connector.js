@@ -266,7 +266,7 @@ export function createConnector(x, y) {
   const con = new Connector(x, y);
   con.isMoving = false;
   con.setAppearance(options);
-  con.move(1, x, y + 100, true);
+  con.move(1, x + 50, y + 50, true);
 
   canvas[con.id] = con;
   canvas.connects.appendChild(con.entity);

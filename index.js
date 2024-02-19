@@ -9,7 +9,7 @@ import { connectorMode } from "./objects/connector.js";
 // Sizes.gridNodes = 500;
 
 const svgElement = document.getElementById("jsfdiagram");
-const container = document.querySelector(".jsf-container");
+const container = document.querySelector(".container");
 
 let width = container.clientWidth;
 let height = container.clientHeight;
@@ -24,22 +24,19 @@ const spz = getSPZ();
 // default pan to center
 spz.pan({ x: -(size - width) / 2, y: -(size - height) / 2 });
 
-const containment = document.getElementById("jsfDiagramContainment");
-containment.appendChild(container);
-
 document.querySelectorAll("[data-btn-shape]").forEach((e) => {
-    e.addEventListener("click", function (evt) {
-        connectorMode(false);
-        object("plotting"); // reset object buffer
-        const shapeType = evt.target.getAttribute("data-btn-shape");
-        plotIn(shapeType, canvas.wrapper);
-    });
+  e.addEventListener("click", function (evt) {
+    connectorMode(false);
+    object("plotting"); // reset object buffer
+    const shapeType = evt.target.getAttribute("data-btn-shape");
+    plotIn(shapeType, canvas.wrapper);
+  });
 });
 
 document.querySelectorAll("[data-btn-connector]").forEach((e) => {
-    e.addEventListener("click", function (evt) {
-        const type = evt.target.getAttribute("data-btn-connector");
-        object(null);
-        connectorMode(type);
-    });
+  e.addEventListener("click", function (evt) {
+    const type = evt.target.getAttribute("data-btn-connector");
+    object(null);
+    connectorMode(type);
+  });
 });

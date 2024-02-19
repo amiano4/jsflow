@@ -108,6 +108,7 @@ export function diagram(element, width, height) {
   rect.setAttribute("y", 0);
 
   connects.custom("connectors");
+  texts.custom("texts");
 
   element.appendChild(defs);
   wrapper.appendChild(rect);

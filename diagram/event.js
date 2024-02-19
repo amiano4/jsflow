@@ -26,6 +26,20 @@ import {
 import { plotStart, plot, plotEnd } from "../objects/plotter.js";
 import { Ids, getMouse, maxClickTimer } from "./util.js";
 
+export const Subscriptions = {
+  // onshapefocus
+  // onshapeblur
+  // ontextchange
+  // onconnectorfocus
+  // onconnectorblur
+};
+
+export function triggerCustomEvent(eventName, args) {
+  if (Subscriptions.hasOwnProperty(eventName)) {
+    Subscriptions[eventName](args);
+  }
+}
+
 export function bindEventsOn(canvas) {
   // helper function that returns the closest element of a required target
   const is = (event, closest = null) => {

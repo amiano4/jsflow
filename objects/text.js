@@ -4,6 +4,7 @@ import Shape from "./shape.js";
 export default class Text extends Shape {
   constructor(options) {
     super("rect");
+    this.isText = true;
     this.setAppearance({
       fill: "none",
       stroke: Colors.lightblue,

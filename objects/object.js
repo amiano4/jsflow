@@ -67,7 +67,7 @@ export function object(isCurrent = true) {
 
       // requested object is valid
       // it should gain focus and brought to front
-      canvas.palette.appendChild(obj.nodes.container);
+      canvas[obj.isText ? "texts" : "palette"].appendChild(obj.nodes.container);
       obj.useResizeHandler();
       obj.setOn(true);
     }

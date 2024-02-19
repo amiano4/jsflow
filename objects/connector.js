@@ -104,7 +104,7 @@ export default class Connector {
         // Calculate the distance between the source point and the cursor location
         const distanceToCursor = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         // Calculate the adjusted distance (distance to cursor - distance before cursor)
-        const adjustedDistance = distanceToCursor - (distanceToCursor <= 10 ? 5 : 10);
+        const adjustedDistance = distanceToCursor - (distanceToCursor <= 5 ? 2 : 5);
         // const adjustedDistance = distanceToCursor - 20;
         // Calculate the angle between the line connecting the source point and the cursor location, and the x-axis
         const angle = Math.atan2(y2 - y1, x2 - x1);

@@ -6,8 +6,6 @@ import { bindEventsOn } from "./diagram/event.js";
 import { object } from "./objects/object.js";
 import { connectorMode } from "./objects/connector.js";
 
-// Sizes.gridNodes = 500;
-
 const svgElement = document.getElementById("jsfdiagram");
 const container = document.querySelector(".jsf-container");
 
@@ -27,19 +25,40 @@ spz.pan({ x: -(size - width) / 2, y: -(size - height) / 2 });
 const containment = document.getElementById("jsfDiagramContainment");
 containment.appendChild(container);
 
-document.querySelectorAll("[data-btn-shape]").forEach((e) => {
+containment.querySelectorAll("[data-btn-shape]").forEach((e) => {
   e.addEventListener("click", function (evt) {
     connectorMode(false);
     object("plotting"); // reset object buffer
     const shapeType = this.getAttribute("data-btn-shape");
     plotIn(shapeType, canvas.wrapper);
+    this.blur();
   });
 });
 
-document.querySelectorAll("[data-btn-connector]").forEach((e) => {
+containment.querySelectorAll("[data-btn-connector]").forEach((e) => {
   e.addEventListener("click", function (evt) {
     const type = this.getAttribute("data-btn-connector");
     object(null);
     connectorMode(type);
+    this.blur();
+  });
+});
+
+containment.querySelectorAll("[data-btn-fn]").forEach((e) => {
+  e.addEventListener("click", function (evt) {
+    const fn = this.getAttribute("data-btn-fn");
+    switch (fn) {
+      case "zoomin":
+        spz.zoomIn();
+        break;
+      case "zoomout":
+        spz.zoomOut();
+        break;
+      case "zoomreset":
+        spz.pan({ x: -(size - width) / 2, y: -(size - height) / 2 });
+        spz.resetZoom();
+        break;
+    }
+    this.blur();
   });
 });

@@ -1,5 +1,6 @@
 import { canvas } from "../diagram/canvas.js";
 import { uniqid, Ids, Sizes, Colors, AnchorKeys } from "../diagram/util.js";
+import { triggerCustomEvent } from "../diagram/event.js";
 
 function initShape(type) {
   // shape section
@@ -15,7 +16,6 @@ function initShape(type) {
   const textObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
   textObject.setAttribute("x", 0);
   textObject.setAttribute("y", 0);
-  // textObject.setAttribute("jsflow-text-object", "");
 
   const textBody = document.createElement("div");
   textBody.setAttribute("xlmns", "http://www.w3.org/1999/xhtml");
@@ -247,11 +247,13 @@ export default class Shape {
         stroke: "#000",
         strokeDashArray: null,
       });
+      triggerCustomEvent("onshapeblur", this);
     } else if (mode) {
       // show controller/handler
       this.controller.status = true;
       this.updateController();
       canvas.wrapper.appendChild(this.nodes.handlerContainer);
+      triggerCustomEvent("onshapefocus", this);
     }
     return this;
   }
@@ -324,8 +326,8 @@ export default class Shape {
       if (this.nodes.textNode.textContent == "") {
         this.nodes.textNode.innerHTML = "&nbsp;".repeat(15);
       }
-
       this.nodes.textNode.removeAttribute("contenteditable");
+      triggerCustomEvent("ontextchange", this.nodes.textNode);
     } else {
       // start edit
       this.nodes.textNode.contentEditable = true;

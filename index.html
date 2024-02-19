@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .container {
+        border: 1px solid #ddd;
+        height: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="padding-bottom: 1rem; display: flex; gap: 1rem">
+      <div class="shapes">
+        <p>shapes</p>
+        <button type="button" data-btn-shape="Rectangle">rectangle</button>
+        <button type="button" data-btn-shape="Ellipse">ellipse</button>
+        <button type="button" data-btn-shape="Circle">cicrle</button>
+        <button type="button" data-btn-shape="Diamond">diamond</button>
+        <button type="button" data-btn-shape="Text">text</button>
+      </div>
+      <div>
+        <p>connector</p>
+        <button type="button" data-btn-connector="line">line</button>
+        <button type="button" data-btn-connector="arrow">arrow line</button>
+        <button type="button" data-btn-connector="double-arrow">double-arrow line</button>
+        <button type="button" data-btn-connector="elbow">elbow connector</button>
+        <button type="button" data-btn-connector="arrow-elbow">arrow elbow connector</button>
+        <button type="button" data-btn-connector="double-arrow-elbow">double-arrow elbow connector</button>
+      </div>
+    </div>
+    <div class="container">
+      <svg id="jsfdiagram"></svg>
+    </div>
+    <script src="lib/hammer.js"></script>
+    <script src="lib/svg-pan-zoom.min.js"></script>
+    <script src="lib/pathfinding-browser.min.js"></script>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

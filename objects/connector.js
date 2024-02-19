@@ -1,4 +1,5 @@
 import { canvas } from "../diagram/canvas.js";
+import { triggerCustomEvent } from "../diagram/event.js";
 import { getSPZ } from "../diagram/spz.js";
 import { Ids, uniqid, Colors, Sizes, lineOffset } from "../diagram/util.js";
 import { object } from "./object.js";
@@ -15,7 +16,6 @@ export default class Connector {
     this.toId = null;
     this.dragOrigin = null;
 
-    // this.container;
     this.entity = document.createElementNS("http://www.w3.org/2000/svg", "path");
     this.id = uniqid("con");
     this.entity.custom(Ids.connector, this.id);
@@ -143,8 +143,10 @@ export function connectorMode(mode = null) {
     getSPZ().enablePan();
 
     if (mode instanceof Connector) {
+      triggerCustomEvent("onconnectorfocus", obj);
       return (obj = mode);
     }
+    triggerCustomEvent("onconnectorblur", obj);
   } else if (mode !== null) {
     obj = mode;
     showPorts(true);
@@ -244,8 +246,10 @@ export function focusOnConnector(id, mode = true) {
     obj = canvas[id];
     obj.isMoving = false;
     canvas.wrapper.appendChild(obj.anchorGroup);
+    triggerCustomEvent("onconnectorfocus", obj);
   } else {
     canvas[id].anchorGroup.remove();
+    triggerCustomEvent("onconnectorblur", obj);
   }
   return true;
 }

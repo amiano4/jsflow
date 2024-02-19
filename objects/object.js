@@ -22,7 +22,7 @@ let hovered = null;
 
 export function create(shape, config) {
   if (!shapeCollection.hasOwnProperty(shape)) {
-    console.error("Incorrect shap to be created.");
+    console.error("Incorrect shape to be created.");
     return null;
   }
 

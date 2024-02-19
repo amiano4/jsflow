@@ -42,7 +42,6 @@ function initShape(type) {
     textBody,
     textObject,
     textNode,
-    // handlerBox,
     handlerContainer,
   };
 }
@@ -249,6 +248,7 @@ export default class Shape {
         strokeDashArray: null,
       });
     } else if (mode) {
+      // show controller/handler
       this.controller.status = true;
       this.updateController();
       canvas.wrapper.appendChild(this.nodes.handlerContainer);

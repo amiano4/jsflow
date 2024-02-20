@@ -74,22 +74,3 @@ containment.querySelectorAll("[data-btn-fn]").forEach((e) => {
     this.blur();
   });
 });
-
-$(".colorSelector").each(function () {
-  $(this).minicolors({
-    control: "hue",
-    defaultValue: "",
-    inline: false,
-    letterCase: "lowercase",
-    position: "bottom left",
-    opacity: false,
-    change: function (hex, opacity) {
-      if (!hex) return;
-      if (opacity) hex += ", " + opacity;
-      if (typeof console === "object") {
-        console.log(hex);
-      }
-    },
-    theme: "bootstrap",
-  });
-});

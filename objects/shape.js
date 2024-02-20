@@ -25,6 +25,7 @@ function initShape(type) {
   textNode.setAttribute("spellcheck", false);
   textNode.setAttribute("autocomplete", "off");
   textNode.textContent = "Add text here";
+  textNode.style.color = "#000000";
 
   textBody.appendChild(textNode);
   textObject.appendChild(textBody);
@@ -52,12 +53,12 @@ export default class Shape {
     this.y = 0;
     this.width = 100;
     this.height = 100;
-    this.appearance = { stroke: "#000000" };
+    this.outline = "solid";
+    this.appearance = {};
     this.state = {
       drag: null,
       resize: null,
       textedit: false,
-      path: { on: false },
       prev: {},
     };
     this.controller = {
@@ -67,12 +68,15 @@ export default class Shape {
     };
     this.nodes = initShape(nodeType);
     this.id = this.nodes.container.id;
-    this.setAppearance({
-      fill: "#fff",
-      stroke: "#000",
-      strokeWidth: "1",
-      strokeDashArray: null,
-    });
+    this.setAppearance(
+      {
+        fill: "#fff",
+        strokeWidth: "1",
+        strokeDashArray: null,
+        stroke: "#000000",
+      },
+      true
+    );
     this.connectors = { in: [], out: [] };
 
     const myInstance = this;
@@ -125,7 +129,7 @@ export default class Shape {
       if (isFinal) this.appearance.stroke = options.stroke;
       this.nodes.entity.setAttribute("stroke", options.stroke);
     } else if (options.stroke === null) {
-      // this.nodes.entity.setAttribute("stroke", this.appearance.stroke);
+      this.nodes.entity.setAttribute("stroke", this.appearance.stroke);
     }
 
     if (options.strokeWidth) {
@@ -374,7 +378,6 @@ export default class Shape {
   reset() {
     this.state.drag = null;
     this.state.resize = null;
-    this.state.path = { on: false };
     this.controller.status && this.setOn(false);
     this.state.textedit && this.setTextEditOn(false);
   }

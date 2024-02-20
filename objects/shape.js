@@ -52,7 +52,7 @@ export default class Shape {
     this.y = 0;
     this.width = 100;
     this.height = 100;
-    this.appearance = {};
+    this.appearance = { stroke: "#000000" };
     this.state = {
       drag: null,
       resize: null,
@@ -74,6 +74,13 @@ export default class Shape {
       strokeDashArray: null,
     });
     this.connectors = { in: [], out: [] };
+
+    const myInstance = this;
+    this.nodes.textNode.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        myInstance.setTextEditOn(false);
+      }
+    });
   }
 
   updateController() {
@@ -113,10 +120,12 @@ export default class Shape {
     return key === "all" ? coords : coords[key] || null;
   }
 
-  setAppearance(options) {
+  setAppearance(options, isFinal = false) {
     if (options.stroke) {
-      this.appearance.stroke = options.stroke;
-      this.nodes.entity.setAttribute("stroke", this.appearance.stroke);
+      if (isFinal) this.appearance.stroke = options.stroke;
+      this.nodes.entity.setAttribute("stroke", options.stroke);
+    } else if (options.stroke === null) {
+      // this.nodes.entity.setAttribute("stroke", this.appearance.stroke);
     }
 
     if (options.strokeWidth) {
@@ -127,7 +136,7 @@ export default class Shape {
     if (options.strokeDashArray) {
       this.appearance.strokeDashArray = options.strokeDashArray;
       this.nodes.entity.setAttribute("stroke-dasharray", this.appearance.strokeDashArray);
-    } else {
+    } else if (options.strokeDashArray === null) {
       this.appearance.strokeDashArray = options.strokeDashArray;
       this.nodes.entity.removeAttribute("stroke-dasharray");
     }
@@ -243,17 +252,15 @@ export default class Shape {
     if (!mode && this.controller.status !== false) {
       this.controller.status = false;
       this.nodes.handlerContainer.remove();
-      this.setAppearance({
-        stroke: "#000",
-        strokeDashArray: null,
-      });
+      this.setAppearance({ stroke: this.appearance.stroke }, true);
       triggerCustomEvent("onshapeblur", this);
     } else if (mode) {
       // show controller/handler
       this.controller.status = true;
       this.updateController();
       canvas.wrapper.appendChild(this.nodes.handlerContainer);
-      triggerCustomEvent("onshapefocus", this);
+      if (this.controller.mode === "transform") triggerCustomEvent("onshapefocus", this);
+      else if (this.controller.mode === "path") triggerCustomEvent("onbusy");
     }
     return this;
   }
@@ -328,6 +335,7 @@ export default class Shape {
       }
       this.nodes.textNode.removeAttribute("contenteditable");
       triggerCustomEvent("ontextchange", this.nodes.textNode);
+      triggerCustomEvent("onstandby");
     } else {
       // start edit
       this.nodes.textNode.contentEditable = true;
@@ -337,6 +345,7 @@ export default class Shape {
       range.selectNodeContents(this.nodes.textNode);
       selection.removeAllRanges();
       selection.addRange(range);
+      triggerCustomEvent("onbusy");
     }
 
     this.state.textedit = mode;
@@ -368,5 +377,20 @@ export default class Shape {
     this.state.path = { on: false };
     this.controller.status && this.setOn(false);
     this.state.textedit && this.setTextEditOn(false);
+  }
+
+  remove() {
+    // unmount connectors
+    for (let i in this.connectors.in) {
+      const con = canvas[this.connectors.in[i][0]] || null;
+      if (con) con.toId = null;
+    }
+    for (let i in this.connectors.out) {
+      const con = canvas[this.connectors.out[i][0]] || null;
+      if (con) con.fromId = null;
+    }
+    this.nodes.handlerContainer.remove();
+    this.nodes.container.remove();
+    delete canvas[this.id];
   }
 }

@@ -4,7 +4,6 @@ import { Ids, Sizes, uniqid, Colors } from "./util.js";
 let isEnabled = false;
 const { perNode, subGrid, gridNodes } = Sizes;
 const sub = perNode * subGrid;
-const arrowSize = perNode * 0.5;
 
 const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
 defs.innerHTML = `
@@ -15,16 +14,6 @@ defs.innerHTML = `
     <rect width="${sub}" height="${sub}" fill="url(#singleGrid)"></rect>
     <path d="M ${sub} 0 L 0 0 0 ${sub}" fill="none" stroke="#ccc" stroke-width="1"></path>
   </pattern>
-  <marker id="arrowheadend"
-    markerWidth="${arrowSize}" markerHeight="${arrowSize}" 
-    refX="${arrowSize - 1}" refY="${arrowSize / 2}" orient="auto">
-      <polygon points="0,0 ${arrowSize},${arrowSize / 2} 0,${arrowSize}" fill="black"></polygon>
-  </marker>
-  <marker id="arrowheadstart"
-    markerWidth="${arrowSize}" markerHeight="${arrowSize}" 
-    refX="1" refY="${arrowSize / 2}" orient="auto">
-      <polygon points="${arrowSize},0 0,${arrowSize / 2} ${arrowSize},${arrowSize}" fill="black"></polygon>
-  </marker>
 `;
 
 const css = `
@@ -78,7 +67,7 @@ const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
 const texts = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
 // first level container of objects/shapes
-// const outerPalette = document.createElementNS("http://www.w3.org/2000/svg", "g");
+const containment = document.createElementNS("http://www.w3.org/2000/svg", "g");
 const palette = document.createElementNS("http://www.w3.org/2000/svg", "g");
 const connects = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
@@ -112,11 +101,13 @@ export function diagram(element, width, height) {
   connects.custom("connectors");
   texts.custom("texts");
 
-  element.appendChild(defs);
-  wrapper.appendChild(rect);
-  wrapper.appendChild(palette);
-  wrapper.appendChild(texts);
-  wrapper.appendChild(connects);
+  containment.custom("containment");
+  containment.appendChild(defs);
+  containment.appendChild(rect);
+  containment.appendChild(palette);
+  containment.appendChild(texts);
+  containment.appendChild(connects);
+  wrapper.appendChild(containment);
   element.appendChild(wrapper);
   return element;
 }
@@ -134,6 +125,31 @@ export function IsEnabled(mode = "get") {
   }
 
   console.log("JSF mode is " + mode);
+}
+
+export function createArrow(to) {
+  const size = perNode * 0.5;
+  const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+
+  if (to == "head") {
+    marker.innerHTML = `<polygon points="0,0 ${size},${size / 2} 0,${size}" fill="black"></polygon>`;
+    marker.setAttribute("refX", size - 1);
+  } else if (to == "tail") {
+    marker.innerHTML = `<polygon points="${size},0 0,${size / 2} ${size},${size}" fill="black"></polygon>`;
+    marker.setAttribute("refX", 1);
+  }
+
+  marker.id = uniqid("mrk");
+  marker.setAttribute("markerWidth", size);
+  marker.setAttribute("markerHeight", size);
+  marker.setAttribute("refY", size / 2);
+  marker.setAttribute("orient", "auto");
+  defs.appendChild(marker);
+
+  return {
+    arrow: marker.querySelector("polygon"),
+    id: marker.id,
+  };
 }
 
 export const canvas = { wrapper, palette, connects, texts };

@@ -14,15 +14,15 @@ export default class Text extends Shape {
     this.lockUpdate(options);
   }
 
-  setAppearance(options) {
+  setAppearance(options, isFinal = false) {
     if (options.stroke == Colors.lightblue) {
       this.nodes.entity.setAttribute("stroke", Colors.lightblue);
       this.nodes.entity.setAttribute("stroke-width", 1);
       this.nodes.entity.setAttribute("stroke-dasharray", "2,5");
     } else {
-      options.stroke && this.nodes.entity.removeAttribute("stroke");
-      options.strokeWidth && this.nodes.entity.removeAttribute("stroke-width");
-      options.strokeDashArray && this.nodes.entity.removeAttribute("stroke-dasharray");
+      this.nodes.entity.removeAttribute("stroke");
+      this.nodes.entity.removeAttribute("stroke-width");
+      this.nodes.entity.removeAttribute("stroke-dasharray");
     }
 
     if (options.fill) {

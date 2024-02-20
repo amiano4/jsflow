@@ -24,6 +24,7 @@ import {
   isDestination,
 } from "../objects/object.js";
 import { plotStart, plot, plotEnd } from "../objects/plotter.js";
+import { IsEnabled } from "./canvas.js";
 import { Ids, getMouse, maxClickTimer } from "./util.js";
 
 export const Subscriptions = {
@@ -32,6 +33,8 @@ export const Subscriptions = {
   // ontextchange
   // onconnectorfocus
   // onconnectorblur
+  // onbusy
+  // onstandby
 };
 
 export function triggerCustomEvent(eventName, args) {
@@ -54,6 +57,8 @@ export function bindEventsOn(canvas) {
   let clickTimer = 0;
 
   canvas.diagram.addEventListener("mousedown", (e) => {
+    if (!IsEnabled()) return;
+
     const { x, y } = getMouse(canvas, e);
     let t = null;
     let t2 = null;
@@ -125,6 +130,8 @@ export function bindEventsOn(canvas) {
   });
 
   canvas.diagram.addEventListener("mousemove", (e) => {
+    if (!IsEnabled()) return;
+
     const { x, y } = getMouse(canvas, e);
 
     if (
@@ -140,6 +147,8 @@ export function bindEventsOn(canvas) {
   });
 
   canvas.diagram.addEventListener("mouseup", (e) => {
+    if (!IsEnabled()) return;
+
     const { x, y } = getMouse(canvas, e);
     let t = null;
 
@@ -172,5 +181,10 @@ export function bindEventsOn(canvas) {
     if (plotEnd(x, y) || resizeEnd(x, y) || dropObj(x, y)) {
       console.log("click released");
     }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (!IsEnabled()) return;
+    // console.log(e.key);
   });
 }

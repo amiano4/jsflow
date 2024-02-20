@@ -1,5 +1,7 @@
+import { getSPZ } from "./spz.js";
 import { Ids, Sizes, uniqid, Colors } from "./util.js";
 
+let isEnabled = false;
 const { perNode, subGrid, gridNodes } = Sizes;
 const sub = perNode * subGrid;
 const arrowSize = perNode * 0.5;
@@ -117,6 +119,21 @@ export function diagram(element, width, height) {
   wrapper.appendChild(connects);
   element.appendChild(wrapper);
   return element;
+}
+
+export function IsEnabled(mode = "get") {
+  if (mode === "get") return isEnabled;
+  else if (mode === true) {
+    isEnabled = true;
+    getSPZ().enablePan();
+    getSPZ().enableZoom();
+  } else if (mode === false) {
+    isEnabled = false;
+    getSPZ().disablePan();
+    getSPZ().disableZoom();
+  }
+
+  console.log("JSF mode is " + mode);
 }
 
 export const canvas = { wrapper, palette, connects, texts };

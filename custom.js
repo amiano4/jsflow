@@ -9,21 +9,36 @@ const objectMenu = {
   processStepInput: document.getElementById("isProcessStepInput"),
   textEditor: document.getElementById("omTextInput"),
   outlineBtns: Array.from(document.querySelectorAll("#omOutlineBtnGrp .btn[data-value]") || []),
+  bgColorInput: document.getElementById("bgColorInput"),
+  outlineColorInput: document.getElementById("outlineColorInput"),
   outline: function (value = null) {
     if (value != null) {
       // setting new mode
       this.outlineBtns.forEach((e) => {
         if (e.dataset.value == value) {
           e.classList.remove("btn-default");
-          e.classList.add("btn-primary");
+          e.classList.add("grey");
         } else {
           e.classList.add("btn-default");
-          e.classList.remove("btn-primary");
+          e.classList.remove("grey");
         }
       });
+      if (this.instance) {
+        switch (value) {
+          case "solid":
+            this.instance.setAppearance({ strokeDashArray: null });
+            break;
+          case "dot":
+            this.instance.setAppearance({ strokeDashArray: "2,6" });
+            break;
+          case "dash":
+            this.instance.setAppearance({ strokeDashArray: "7,6" });
+            break;
+        }
+      }
     } else {
-      value = document.querySelector("#omOutlineBtnGrp .btn-primary") || null;
-      return value ? value.dataset.value : null;
+      let isActive = document.querySelector("#omOutlineBtnGrp .btn-primary") || null;
+      return isActive ? isActive.dataset.value : null;
     }
   },
   show: function (mode = true) {
@@ -43,23 +58,46 @@ const objectMenu = {
   hide: function () {
     this.box.classList.add("hide");
   },
+  setColor: function (id, value) {
+    if (this.instance instanceof Shape) {
+      if (id == "bgColorInput") {
+        this.instance.setAppearance({ fill: value });
+      } else if (id == "outlineColorInput") {
+        this.instance.setAppearance({ stroke: value }, true);
+      }
+    }
+  },
 };
 
 const lineMenu = {
   box: document.getElementById("lineSettingsMenu"),
   typeBtns: Array.from(document.querySelectorAll("#lmTypeBtnGrp .btn[data-value]") || []),
+  lineColorInput: document.getElementById("lineColorInput"),
   type: function (value = null) {
     if (value != null) {
       // setting new mode
       this.typeBtns.forEach((e) => {
         if (e.dataset.value == value) {
           e.classList.remove("btn-default");
-          e.classList.add("btn-primary");
+          e.classList.add("grey");
         } else {
           e.classList.add("btn-default");
-          e.classList.remove("btn-primary");
+          e.classList.remove("grey");
         }
       });
+      if (this.instance) {
+        switch (value) {
+          case "solid":
+            this.instance.setAppearance({ strokeDashArray: null });
+            break;
+          case "dot":
+            this.instance.setAppearance({ strokeDashArray: "2,6" });
+            break;
+          case "dash":
+            this.instance.setAppearance({ strokeDashArray: "7,6" });
+            break;
+        }
+      }
     } else {
       value = document.querySelector("#omOutlineBtnGrp .btn-primary") || null;
       return value ? value.dataset.value : null;
@@ -78,6 +116,13 @@ const lineMenu = {
   hide: function () {
     this.box.classList.add("hide");
   },
+  setColor: function (id, value) {
+    if (this.instance instanceof Connector) {
+      if (id == "lineColorInput") {
+        this.instance.setAppearance({ stroke: value }, true);
+      }
+    }
+  },
 };
 
 export function Customize(listener) {
@@ -85,6 +130,8 @@ export function Customize(listener) {
     lineMenu.instance = null;
     objectMenu.instance = obj;
     objectMenu.textEditor.value = obj.nodes.textNode.textContent;
+    $(objectMenu.bgColorInput).minicolors("value", obj.appearance.fill);
+    $(objectMenu.outlineColorInput).minicolors("value", obj.appearance.stroke);
     objectMenu.show();
   };
 
@@ -128,6 +175,13 @@ objectMenu.textEditor.addEventListener("keyup", function () {
     const obj = objectMenu.instance;
     obj.nodes.textNode.innerText = this.value;
   }
+});
+
+lineMenu.typeBtns.forEach((btn) => {
+  btn.addEventListener("click", function () {
+    if (!IsEnabled()) return;
+    lineMenu.type(this.dataset.value);
+  });
 });
 
 let dragFrom = null;
@@ -198,5 +252,27 @@ document.querySelectorAll("[data-jsfmenu-close]").forEach((el) => {
     } else if (panel == "lineMenu") {
       lineMenu.show(false);
     }
+  });
+});
+
+$(".colorSelector").each(function () {
+  $(this).minicolors({
+    control: "hue",
+    defaultValue: "",
+    inline: false,
+    letterCase: "lowercase",
+    position: "bottom left",
+    opacity: false,
+    change: function (hex, opacity) {
+      if (!hex) return;
+      const id = this.id;
+
+      if (objectMenu.hasOwnProperty(id)) {
+        objectMenu.setColor(id, hex);
+      } else if (lineMenu.hasOwnProperty(id)) {
+        lineMenu.setColor(id, hex);
+      }
+    },
+    theme: "bootstrap",
   });
 });

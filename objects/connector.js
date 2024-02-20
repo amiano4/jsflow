@@ -9,7 +9,7 @@ export default class Connector {
   constructor(x, y) {
     this.coords = [[x, y]];
     this.isElbow = false;
-    this.appearance = {};
+    this.appearance = { stroke: "#000000" };
     this.isMoving = false;
     this.movingAnchor = null;
     this.fromId = null;
@@ -44,10 +44,12 @@ export default class Connector {
     return a;
   }
 
-  setAppearance(options) {
+  setAppearance(options, isFinal = false) {
     if (options.stroke) {
-      this.appearance.stroke = options.stroke;
+      isFinal && (this.appearance.stroke = options.stroke);
       this.entity.setAttribute("stroke", options.stroke);
+    } else {
+      this.entity.setAttribute("stroke", this.appearance.stroke);
     }
 
     if (options.strokeWidth) {
@@ -58,7 +60,7 @@ export default class Connector {
     if (options.strokeDashArray) {
       this.appearance.strokeDashArray = options.strokeDashArray;
       this.entity.setAttribute("stroke-dasharray", options.strokeDashArray);
-    } else {
+    } else if (options.strokeDashArray === null) {
       this.appearance.strokeDashArray = options.strokeDashArray;
       this.entity.removeAttribute("stroke-dasharray");
     }
@@ -79,6 +81,11 @@ export default class Connector {
   }
 
   move(index, x, y, lock = false, showAnchors = true) {
+    if (!busyIsCalled) {
+      triggerCustomEvent("onbusy");
+      busyIsCalled = true;
+    }
+
     if (index === -1) index = this.coords.length - 1;
     let d = "M "; // start d value
     this.coords[index] = [x, y]; // reassign coordinates
@@ -134,8 +141,10 @@ export default class Connector {
 let obj = null;
 let enabledAll = false;
 let lastDragCoords = null;
+let busyIsCalled = false;
 
 export function connectorMode(mode = null) {
+  busyIsCalled = false;
   if (mode === false || mode instanceof Connector) {
     obj = null;
     showPorts(false);
@@ -143,7 +152,7 @@ export function connectorMode(mode = null) {
     getSPZ().enablePan();
 
     if (mode instanceof Connector) {
-      triggerCustomEvent("onconnectorfocus", obj);
+      triggerCustomEvent("onconnectorfocus", mode);
       return (obj = mode);
     }
     triggerCustomEvent("onconnectorblur", obj);
@@ -152,7 +161,6 @@ export function connectorMode(mode = null) {
     showPorts(true);
     canvas.diagram.style.cursor = "crosshair";
   }
-
   return typeof obj === "string";
 }
 
@@ -165,7 +173,6 @@ export function startConnection(x, y) {
   const options = {
     stroke: Colors.lightblue_alpha,
     strokeWidth: 1,
-    strokeDashArray: "2,5",
   };
 
   if (obj == "arrow" || obj == "arrow-elbow") options.arrow = "arrow";
@@ -200,14 +207,11 @@ export function endConnection(x, y, snap = false) {
   }
 
   obj.move(obj.movingAnchor || 1, x, y, true, true);
-  obj.setAppearance({
-    stroke: "#000",
-    strokeWidth: 1,
-    strokeDashArray: null,
-  });
+  obj.setAppearance({});
   obj.movingAnchor = null;
   obj.isMoving = false;
   connectorMode(obj);
+  busyIsCalled = false;
   return obj;
 }
 
@@ -218,10 +222,12 @@ export function showPorts(mode) {
       if (!mode) {
         obj.reset();
         enabledAll = false;
+        triggerCustomEvent("onstandby");
       } else {
         enabledAll = true;
         obj.usePathHandler();
         obj.setOn(true);
+        triggerCustomEvent("onbusy");
       }
     }
   });
@@ -284,8 +290,6 @@ export function grabConnector(index) {
 
   obj.setAppearance({
     stroke: Colors.lightblue_alpha,
-    strokeWidth: 1,
-    strokeDashArray: "2,5",
   });
 
   if ((obj.fromId && index == 0) || (obj.toId && index == obj.coords.length - 1)) {
@@ -350,6 +354,7 @@ export function startDrag(x, y) {
   obj.dragOrigin = { x, y };
   getSPZ().disablePan();
   object(null);
+  triggerCustomEvent("onbusy");
   return true;
 }
 
@@ -381,6 +386,11 @@ export function dragConnector(x, y) {
   }
   canvas.wrapper.appendChild(obj.anchorGroup);
 
+  if (!busyIsCalled) {
+    triggerCustomEvent("onbusy");
+    busyIsCalled = true;
+  }
+
   return true;
 }
 
@@ -398,5 +408,7 @@ export function dropConnector(x, y) {
   obj.dragOrigin = null;
   lastDragCoords = null;
   getSPZ().enablePan();
+  busyIsCalled = false;
+  triggerCustomEvent("onstandby");
   return true;
 }

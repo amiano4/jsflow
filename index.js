@@ -19,9 +19,9 @@ let height = container.clientHeight;
 
 canvas.diagram = diagram(svgElement, width, height);
 Init(canvas.diagram);
+EnableJSF(true);
 bindEventsOn(canvas);
 Customize(Subscriptions);
-EnableJSF(true);
 
 const size = Sizes.perNode * Sizes.gridNodes;
 const spz = getSPZ();

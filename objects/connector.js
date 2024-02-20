@@ -1,4 +1,4 @@
-import { canvas } from "../diagram/canvas.js";
+import { canvas, createArrow } from "../diagram/canvas.js";
 import { triggerCustomEvent } from "../diagram/event.js";
 import { getSPZ } from "../diagram/spz.js";
 import { Ids, uniqid, Colors, Sizes, lineOffset } from "../diagram/util.js";
@@ -21,6 +21,8 @@ export default class Connector {
     this.entity.custom(Ids.connector, this.id);
 
     this.anchors = [this.createAnchor(0)];
+    this.arrow = { tail: null, head: null };
+    this.lineType = "solid";
 
     this.anchorGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     this.externalEntity = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -48,8 +50,12 @@ export default class Connector {
     if (options.stroke) {
       isFinal && (this.appearance.stroke = options.stroke);
       this.entity.setAttribute("stroke", options.stroke);
+      this.arrow.head && this.arrow.head.setAttribute("fill", options.stroke);
+      this.arrow.tail && this.arrow.tail.setAttribute("fill", options.stroke);
     } else {
       this.entity.setAttribute("stroke", this.appearance.stroke);
+      this.arrow.head && this.arrow.head.setAttribute("fill", this.appearance.stroke);
+      this.arrow.tail && this.arrow.tail.setAttribute("fill", this.appearance.stroke);
     }
 
     if (options.strokeWidth) {
@@ -68,10 +74,27 @@ export default class Connector {
     if (options.arrow) {
       this.appearance.arrow = options.arrow;
       if (options.arrow == "arrow") {
-        this.entity.setAttribute("marker-end", "url(#arrowheadend)");
+        if (!this.arrow.head) {
+          const arrowObj = createArrow("head");
+          this.arrow.head = arrowObj.arrow;
+          this.entity.setAttribute("marker-end", `url(#${arrowObj.id})`);
+        }
       } else if (options.arrow == "double-arrow") {
-        this.entity.setAttribute("marker-end", "url(#arrowheadend)");
-        this.entity.setAttribute("marker-start", "url(#arrowheadstart)");
+        // arrow head
+        if (!this.arrow.head) {
+          const arrowObj = createArrow("head");
+          this.arrow.head = arrowObj.arrow;
+          this.arrow.head.setAttribute("fill", this.appearance.stroke);
+          this.entity.setAttribute("marker-end", `url(#${arrowObj.id})`);
+        }
+
+        // arrow tail
+        if (!this.arrow.tail) {
+          const arrowObj = createArrow("tail");
+          this.arrow.tail = arrowObj.arrow;
+          this.arrow.tail.setAttribute("fill", this.appearance.stroke);
+          this.entity.setAttribute("marker-start", `url(#${arrowObj.id})`);
+        }
       }
     } else if (options.arrow === null) {
       this.appearance.arrow = null;
@@ -112,7 +135,6 @@ export default class Connector {
         const distanceToCursor = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         // Calculate the adjusted distance (distance to cursor - distance before cursor)
         const adjustedDistance = distanceToCursor - (distanceToCursor <= 5 ? 2 : 5);
-        // const adjustedDistance = distanceToCursor - 20;
         // Calculate the angle between the line connecting the source point and the cursor location, and the x-axis
         const angle = Math.atan2(y2 - y1, x2 - x1);
         // Calculate the coordinates of the point at the adjusted distance from the source point along this angle
@@ -123,8 +145,8 @@ export default class Connector {
       d += fx + " " + fy + " ";
     }
     // update
-    this.entity.setAttribute("d", d + "");
-    this.externalEntity.setAttribute("d", d + "");
+    this.entity.setAttribute("d", d);
+    this.externalEntity.setAttribute("d", d);
 
     if (lock) {
       for (let a in this.coords) {
@@ -135,6 +157,15 @@ export default class Connector {
       }
       showAnchors && canvas.wrapper.appendChild(this.anchorGroup);
     }
+  }
+
+  remove() {
+    this.anchorGroup.remove();
+    this.externalEntity.remove();
+    this.entity.remove();
+    this.arrow.head && this.arrow.head.parentElement.remove();
+    this.arrow.tail && this.arrow.tail.parentElement.remove();
+    delete canvas[this.id];
   }
 }
 
@@ -207,11 +238,23 @@ export function endConnection(x, y, snap = false) {
   }
 
   obj.move(obj.movingAnchor || 1, x, y, true, true);
+  busyIsCalled = false;
+
+  const [tx, ty] = obj.coords[0];
+  const [hx, hy] = obj.coords[obj.coords.length - 1];
+
+  if (tx == hx && ty == hy) {
+    // remove the whole connector routed to the same origin
+    disconnect();
+    obj.remove();
+    connectorMode((obj = null));
+    return;
+  }
+
   obj.setAppearance({});
   obj.movingAnchor = null;
   obj.isMoving = false;
   connectorMode(obj);
-  busyIsCalled = false;
   return obj;
 }
 

@@ -2,6 +2,7 @@ import { IsEnabled, canvas } from "./diagram/canvas.js";
 import Connector, { connectorMode } from "./objects/connector.js";
 import { object } from "./objects/object.js";
 import Shape from "./objects/shape.js";
+import Text from "./objects/text.js";
 
 const objectMenu = {
   box: document.getElementById("objectSettingsMenu"),
@@ -10,6 +11,7 @@ const objectMenu = {
   textEditor: document.getElementById("omTextInput"),
   outlineBtns: Array.from(document.querySelectorAll("#omOutlineBtnGrp .btn[data-value]") || []),
   bgColorInput: document.getElementById("bgColorInput"),
+  textColorInput: document.getElementById("textColorInput"),
   outlineColorInput: document.getElementById("outlineColorInput"),
   outline: function (value = null) {
     if (value != null) {
@@ -26,12 +28,15 @@ const objectMenu = {
       if (this.instance) {
         switch (value) {
           case "solid":
+            this.instance.outline = "solid";
             this.instance.setAppearance({ strokeDashArray: null });
             break;
           case "dot":
+            this.instance.outline = "dot";
             this.instance.setAppearance({ strokeDashArray: "2,6" });
             break;
           case "dash":
+            this.instance.outline = "dash";
             this.instance.setAppearance({ strokeDashArray: "7,6" });
             break;
         }
@@ -64,6 +69,8 @@ const objectMenu = {
         this.instance.setAppearance({ fill: value });
       } else if (id == "outlineColorInput") {
         this.instance.setAppearance({ stroke: value }, true);
+      } else if (id == "textColorInput") {
+        this.instance.nodes.textNode.style.color = value;
       }
     }
   },
@@ -88,12 +95,15 @@ const lineMenu = {
       if (this.instance) {
         switch (value) {
           case "solid":
+            this.instance.lineType = "solid";
             this.instance.setAppearance({ strokeDashArray: null });
             break;
           case "dot":
+            this.instance.lineType = "dot";
             this.instance.setAppearance({ strokeDashArray: "2,6" });
             break;
           case "dash":
+            this.instance.lineType = "dash";
             this.instance.setAppearance({ strokeDashArray: "7,6" });
             break;
         }
@@ -125,13 +135,44 @@ const lineMenu = {
   },
 };
 
+function rgbToHex(rgb) {
+  // Separate the RGB components
+  var rgbArray = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+  if (!rgbArray) return rgb;
+
+  // Convert each component to hexadecimal and concatenate
+  function hex(x) {
+    return ("0" + parseInt(x).toString(16)).slice(-2);
+  }
+  return "#" + hex(rgbArray[1]) + hex(rgbArray[2]) + hex(rgbArray[3]);
+}
+
 export function Customize(listener) {
   listener.onshapefocus = function (obj) {
     lineMenu.instance = null;
-    objectMenu.instance = obj;
     objectMenu.textEditor.value = obj.nodes.textNode.textContent;
-    $(objectMenu.bgColorInput).minicolors("value", obj.appearance.fill);
-    $(objectMenu.outlineColorInput).minicolors("value", obj.appearance.stroke);
+
+    if (obj instanceof Text) {
+      document.getElementById("omSmallNote").innerHTML = "Text color";
+      document.getElementById("omProcessSection").style.display = "none";
+      document.getElementById("omOutlineSection").style.display = "none";
+      objectMenu.bgColorInput.closest("div.border").style.display = "none";
+      objectMenu.outlineColorInput.closest("div.border").style.display = "none";
+    } else {
+      document.getElementById("omSmallNote").innerHTML = `Colors
+              <small class="text-muted">(Background | Outline | Text)</small>`;
+      document.getElementById("omProcessSection").style.display = "block";
+      document.getElementById("omOutlineSection").style.display = "block";
+      objectMenu.bgColorInput.closest("div.border").style.display = "block";
+      objectMenu.outlineColorInput.closest("div.border").style.display = "block";
+
+      objectMenu.outline(obj.outline || "solid");
+      $(objectMenu.bgColorInput).minicolors("value", obj.appearance.fill);
+      $(objectMenu.outlineColorInput).minicolors("value", obj.appearance.stroke);
+    }
+    $(objectMenu.textColorInput).minicolors("value", rgbToHex(obj.nodes.textNode.style.color) || "#000000");
+
+    objectMenu.instance = obj;
     objectMenu.show();
   };
 
@@ -142,6 +183,8 @@ export function Customize(listener) {
   listener.onconnectorfocus = function (obj) {
     objectMenu.instance = null;
     lineMenu.instance = obj;
+    lineMenu.type(obj.lineType || "solid");
+    $(lineMenu.lineColorInput).minicolors("value", obj.appearance.stroke);
     lineMenu.show();
   };
 
@@ -159,8 +202,6 @@ export function Customize(listener) {
     objectMenu.show();
   };
 }
-
-export function onColorSelect(id, colorValue) {}
 
 objectMenu.outlineBtns.forEach((btn) => {
   btn.addEventListener("click", function () {
@@ -199,7 +240,6 @@ container.addEventListener("mousedown", function (e) {
       y: e.clientY - parentRect.top - jsfMenu.offsetTop,
       box: e.target.closest(".jsf-menu-box"),
     };
-    console.log(dragFrom);
   }
 });
 
@@ -238,7 +278,8 @@ document.querySelectorAll("[data-jsfmenu-remove]").forEach((el) => {
       objectMenu.show(false);
       console.log("Object has been removed.");
     } else if (panel == "lineMenu") {
-      //
+      lineMenu.instance.remove();
+      lineMenu.show(false);
     }
   });
 });
@@ -261,12 +302,11 @@ $(".colorSelector").each(function () {
     defaultValue: "",
     inline: false,
     letterCase: "lowercase",
-    position: "bottom left",
+    position: "bottom right",
     opacity: false,
     change: function (hex, opacity) {
       if (!hex) return;
       const id = this.id;
-
       if (objectMenu.hasOwnProperty(id)) {
         objectMenu.setColor(id, hex);
       } else if (lineMenu.hasOwnProperty(id)) {

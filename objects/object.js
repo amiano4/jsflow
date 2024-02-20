@@ -8,6 +8,7 @@ import Shape from "./shape.js";
 import { getSPZ } from "../diagram/spz.js";
 import { startConnection, endConnection, connectorMode } from "./connector.js";
 import { AnchorKeys } from "../diagram/util.js";
+import { triggerCustomEvent } from "../diagram/event.js";
 
 const shapeCollection = {
   Rectangle,
@@ -19,6 +20,7 @@ const shapeCollection = {
 
 let obj = null;
 let hovered = null;
+let busyIsCalled = false;
 
 export function create(shape, config) {
   if (!shapeCollection.hasOwnProperty(shape)) {
@@ -82,10 +84,8 @@ export function grabObj(x, y) {
   if (!(obj instanceof Shape) || !obj.controller.status || obj.controller.mode !== "transform") {
     return false;
   }
-
   obj.state.drag = { x, y };
   getSPZ().disablePan();
-
   return true;
 }
 
@@ -93,12 +93,14 @@ export function dragObj(x, y) {
   if (!(obj instanceof Shape) || !obj.state.drag) {
     return false;
   }
-
   obj.update({
     x: obj.x + (x - obj.state.drag.x),
     y: obj.y + (y - obj.state.drag.y),
   });
-
+  if (!busyIsCalled) {
+    triggerCustomEvent("onbusy");
+    busyIsCalled = true;
+  }
   return true;
 }
 
@@ -114,6 +116,9 @@ export function dropObj(x, y) {
 
   obj.state.drag = null;
   getSPZ().enablePan();
+
+  busyIsCalled = false;
+  triggerCustomEvent("onstandby");
   return true;
 }
 
@@ -125,6 +130,7 @@ export function resizeStart(key) {
   obj.state.resize = obj.state.prev;
   obj.state.resize.key = key;
   getSPZ().disablePan();
+
   return true;
 }
 
@@ -132,8 +138,11 @@ export function resize(x, y) {
   if (!(obj instanceof Shape) || !obj.controller.status || !obj.state.resize) {
     return false;
   }
-
   obj.resize(x, y);
+  if (!busyIsCalled) {
+    triggerCustomEvent("onbusy");
+    busyIsCalled = true;
+  }
   return true;
 }
 
@@ -145,6 +154,11 @@ export function resizeEnd() {
   obj.lockUpdate(obj.state.prev);
   obj.state.resize = null;
   getSPZ().enablePan();
+
+  if (busyIsCalled) {
+    triggerCustomEvent("onstandby");
+    busyIsCalled = false;
+  }
   return true;
 }
 

@@ -6,6 +6,7 @@ import { Subscriptions, bindEventsOn } from "./diagram/event.js";
 import { object } from "./objects/object.js";
 import { connectorMode, leaveConnectors } from "./objects/connector.js";
 import { Customize } from "./custom.js";
+import { exportDiagram } from "./diagram/image.js";
 
 // enable console logging
 window.EnableDebugging = true;
@@ -23,6 +24,8 @@ EnableJSF(true);
 bindEventsOn(canvas);
 Customize(Subscriptions);
 
+window.ExportJSF = (callback) => exportDiagram(canvas, callback);
+
 const size = Sizes.perNode * Sizes.gridNodes;
 const spz = getSPZ();
 
@@ -35,10 +38,10 @@ containment.appendChild(container);
 containment.querySelectorAll("[data-btn-shape]").forEach((e) => {
   e.addEventListener("click", function (evt) {
     if (!IsEnabled()) return;
+    const shapeType = this.getAttribute("data-btn-shape");
     connectorMode(false);
     leaveConnectors();
     object("plotting"); // reset object buffer
-    const shapeType = this.getAttribute("data-btn-shape");
     plotIn(shapeType, canvas.wrapper);
     this.blur();
   });

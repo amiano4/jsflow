@@ -87,6 +87,37 @@ export default class Shape {
     });
   }
 
+  setId(id) {
+    this.id = id;
+    this.nodes.container.id = this.id;
+    this.nodes.handlerContainer.custom(Ids.shape, this.id);
+  }
+
+  get() {
+    const data = {
+      type: this.constructor.name,
+      x: this.x,
+      y: this.y,
+      w: this.width,
+      h: this.height,
+      id: this.id,
+      outline: this.outline,
+      appearance: this.appearance,
+      connectors: this.connectors,
+      text: this.nodes.textNode.textContent,
+    };
+
+    if (this.nodes.ccpLabel) {
+      data.ccp = this.nodes.ccpLabel.dataset.ccp;
+    }
+
+    if (window.ProcessSteps.hasOwnProperty(this.id)) {
+      data.step = window.ProcessSteps[this.id].step || 0;
+    }
+
+    return data;
+  }
+
   updateController() {
     if (!this.controller.status) return;
 
@@ -163,7 +194,6 @@ export default class Shape {
     this.nodes.textObject.setAttribute("width", width);
     this.nodes.textObject.setAttribute("height", height);
     this.nodes.textBody.style.height = height + "px";
-    this.nodes.textNode.style.width = width * 0.8 + "px";
     this.updateEntity();
     this.updateController();
     this.bindConnectors();

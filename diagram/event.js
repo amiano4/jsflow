@@ -25,6 +25,7 @@ import {
 } from "../objects/object.js";
 import { plotStart, plot, plotEnd } from "../objects/plotter.js";
 import { IsEnabled } from "./canvas.js";
+import { getSPZ } from "./spz.js";
 import { Ids, getMouse, maxClickTimer } from "./util.js";
 
 export const Subscriptions = {
@@ -142,7 +143,7 @@ export function bindEventsOn(canvas) {
       resize(x, y) ||
       dragObj(x, y)
     ) {
-      console.log("dragging ");
+      // console.log("dragging ");
     }
   });
 
@@ -179,7 +180,7 @@ export function bindEventsOn(canvas) {
       return;
 
     if (plotEnd(x, y) || resizeEnd(x, y) || dropObj(x, y)) {
-      console.log("click released");
+      // console.log("click released");
     }
   });
 

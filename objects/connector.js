@@ -34,6 +34,25 @@ export default class Connector {
     this.anchorGroup.custom(Ids.connector, this.id);
   }
 
+  setId(id) {
+    this.id = id;
+    this.entity.custom(Ids.connector, this.id);
+    this.externalEntity.custom(Ids.connector, this.id);
+    this.anchorGroup.custom(Ids.connector, this.id);
+  }
+
+  get() {
+    return {
+      id: this.id,
+      type: this.constructor.name,
+      coords: this.coords,
+      appearance: this.appearance,
+      from: this.fromId,
+      to: this.toId,
+      line: this.lineType,
+    };
+  }
+
   createAnchor(point) {
     const a = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     a.setAttribute("fill", "#fff");

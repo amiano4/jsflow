@@ -4,6 +4,38 @@ import { object } from "./objects/object.js";
 import Shape from "./objects/shape.js";
 import Text from "./objects/text.js";
 
+Shape.prototype.processStep = function (value = true) {
+  let ps = this.nodes.textBody.querySelector("[data-step]") || null;
+  if (value === true) {
+    // return the value
+    if (ps) {
+      window.ProcessSteps[this.id] = {
+        step: ps.dataset.step,
+        label: this.nodes.textNode.textContent,
+      };
+    }
+    return ps ? ps.dataset.step : null;
+  } else if (value === false || value === null) {
+    if (window.ProcessSteps[this.id]) delete window.ProcessSteps[this.id];
+    ps && ps.remove();
+  } else {
+    if (!ps) {
+      ps = document.createElement("span");
+      ps.style.maxWidth = "4rem";
+      this.nodes.textBody.insertBefore(ps, this.nodes.textNode);
+      this.nodes.textNode.style.maxWidth = "60%";
+    }
+    ps.setAttribute("data-step", value);
+    ps.innerHTML = value + ")";
+    ps.style.marginRight = "1rem";
+
+    window.ProcessSteps[this.id] = {
+      step: value,
+      label: this.nodes.textNode.textContent,
+    };
+  }
+};
+
 const objectMenu = {
   box: document.getElementById("objectSettingsMenu"),
   processStepCheckbox: document.getElementById("isProcessStepCheckbox"),
@@ -135,6 +167,13 @@ const lineMenu = {
   },
 };
 
+const processStepInputChange = function (e) {
+  if (this.value.trim() != "" && objectMenu.processStepCheckbox.checked && objectMenu.instance instanceof Shape) {
+    let value = this.value.replace(/[\x00-\x1F\x7F-\x9F]/g, " ");
+    objectMenu.instance.processStep(value);
+  }
+};
+
 function rgbToHex(rgb) {
   // Separate the RGB components
   var rgbArray = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
@@ -173,6 +212,12 @@ export function Customize(listener) {
     $(objectMenu.textColorInput).minicolors("value", rgbToHex(obj.nodes.textNode.style.color) || "#000000");
 
     objectMenu.instance = obj;
+
+    let ps = obj.processStep();
+    if (ps) {
+      objectMenu.processStepCheckbox.checked = true;
+      objectMenu.processStepInput.value = ps;
+    }
     objectMenu.show();
   };
 
@@ -211,12 +256,25 @@ objectMenu.outlineBtns.forEach((btn) => {
 });
 
 objectMenu.textEditor.addEventListener("keyup", function () {
-  if (objectMenu.hasOwnProperty("instance")) {
+  if (objectMenu.hasOwnProperty("instance") && objectMenu.instance instanceof Shape) {
     if (!IsEnabled()) return;
     const obj = objectMenu.instance;
     obj.nodes.textNode.innerText = this.value;
+    objectMenu.instance.processStep();
   }
 });
+
+objectMenu.processStepCheckbox.addEventListener("change", function () {
+  if (!this.checked) {
+    objectMenu.processStepInput.value = "";
+    if (objectMenu.instance instanceof Shape) {
+      objectMenu.instance.processStep(false);
+    }
+  }
+});
+
+objectMenu.processStepInput.addEventListener("keyup", processStepInputChange);
+objectMenu.processStepInput.addEventListener("change", processStepInputChange);
 
 lineMenu.typeBtns.forEach((btn) => {
   btn.addEventListener("click", function () {
@@ -316,3 +374,26 @@ $(".colorSelector").each(function () {
     theme: "bootstrap",
   });
 });
+
+export function setCCP(id, value) {
+  if (canvas[id] instanceof Shape) {
+    const obj = canvas[id];
+
+    if (value === null) {
+      if (obj.nodes.ccpLabel) {
+        obj.nodes.ccpLabel.remove();
+        delete obj.nodes.ccpLabel;
+      }
+      return;
+    }
+
+    if (!obj.nodes.ccpLabel) {
+      const span = document.createElement("span");
+      span.setAttribute("data-ccp", value);
+      obj.nodes.textBody.appendChild(span);
+      obj.nodes.ccpLabel = span;
+    }
+
+    obj.nodes.ccpLabel.innerHTML = "CCP " + value;
+  }
+}

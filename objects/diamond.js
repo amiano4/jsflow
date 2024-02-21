@@ -3,13 +3,13 @@ import Shape from "./shape.js";
 export default class Diamond extends Shape {
   constructor(options) {
     super("polygon");
+    this.nodes.textNode.style.maxWidth = "40%";
     this.lockUpdate(options);
   }
 
   updateEntity() {
     const { width, height } = this.state.prev;
     const points = `${width / 2} 0, ${width} ${height / 2}, ${width / 2} ${height}, 0 ${height / 2}`;
-    this.nodes.textNode.style.width = width * 0.4 + "px";
     this.nodes.entity.setAttribute("points", points);
   }
 

@@ -396,4 +396,12 @@ export default class Shape {
     this.nodes.container.remove();
     delete canvas[this.id];
   }
+
+  transpose(newX, newY) {
+    const { e, f } = canvas.containment.getCTM();
+    const cloned = this.nodes.container.cloneNode(true);
+    // console.log(e, this.x);
+    cloned.setAttribute("transform", `translate(${newX}, ${newY})`);
+    return cloned;
+  }
 }

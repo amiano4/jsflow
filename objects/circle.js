@@ -27,7 +27,6 @@ export default class Circle extends Shape {
     this.nodes.textObject.setAttribute("width", size);
     this.nodes.textObject.setAttribute("height", size);
     this.nodes.textBody.style.height = size + "px";
-    this.nodes.textNode.style.width = size * 0.8 + "px";
     this.updateController();
     this.bindConnectors();
     return this;

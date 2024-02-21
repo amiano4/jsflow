@@ -20,8 +20,6 @@ export function exportDiagram(canvas, callback) {
   const shapes = [];
   const lines = [];
 
-  console.log(canvas, objs);
-
   let left = Sizes.gridNodes * Sizes.perNode;
   let top = Sizes.gridNodes * Sizes.perNode;
   let right = 0,

@@ -167,6 +167,21 @@ export default class Connector {
     this.arrow.tail && this.arrow.tail.parentElement.remove();
     delete canvas[this.id];
   }
+
+  transpose(left, top) {
+    const entityClone = this.entity.cloneNode();
+    let d = "M "; // start d value
+    for (let i in this.coords) {
+      if (i == 1) d += "L ";
+
+      let fx = this.coords[i][0] - left;
+      let fy = this.coords[i][1] - top;
+      d += fx + " " + fy + " ";
+    }
+    // update
+    entityClone.setAttribute("d", d);
+    return entityClone;
+  }
 }
 
 let obj = null;

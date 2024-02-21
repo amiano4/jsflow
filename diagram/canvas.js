@@ -40,6 +40,7 @@ const css = `
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
   }
 
   foreignObject [data-${Ids.text}] { 
@@ -48,8 +49,25 @@ const css = `
     overflow-wrap: break-word;
     text-align: center;
     white-space: normal;
+    max-width: 80%;
     /* background-color: lightblue; */
     display: inline-block;
+  }
+
+  span[data-step] { 
+    overflow-wrap: break-word;
+    white-space: normal;
+    max-width: 80%;
+    display: inline-block;
+    font-weight: bold;
+  }
+
+  span[data-ccp] {
+    position:absolute;
+    bottom: 10px;
+    right: 10px;
+    font-weight: bold;
+    color: red;
   }
   
   foreignObject [contenteditable] { cursor: text; }

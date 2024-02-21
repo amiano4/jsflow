@@ -102,8 +102,8 @@ export function diagram(element, width, height) {
   texts.custom("texts");
 
   containment.custom("containment");
+  wrapper.appendChild(rect);
   containment.appendChild(defs);
-  containment.appendChild(rect);
   containment.appendChild(palette);
   containment.appendChild(texts);
   containment.appendChild(connects);
@@ -152,4 +152,4 @@ export function createArrow(to) {
   };
 }
 
-export const canvas = { wrapper, palette, connects, texts };
+export const canvas = { wrapper, palette, connects, texts, containment, defs };

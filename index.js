@@ -156,7 +156,10 @@ window.setJSFDiagram = function (data) {
         canvas.palette.appendChild(obj.nodes.container);
       }
 
-      d.ccp && setCCP(d.id, d.ccp);
+      if (d.ccp) {
+        setCCP(d.id, d.ccp);
+        console.log(d.cpp);
+      }
       // obj.useResizeHandler();
       // obj.setOn(true);
       // obj.setOn(false);

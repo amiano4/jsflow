@@ -73,7 +73,7 @@ export function exportDiagram(canvas, callback) {
 
   for (let i in lines) {
     const obj = lines[i];
-    svg.appendChild(obj.transpose(left + padding, top + padding));
+    svg.appendChild(obj.transpose(left - padding, top - padding));
   }
 
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);

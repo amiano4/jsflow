@@ -332,6 +332,7 @@ document.querySelectorAll("[data-jsfmenu-remove]").forEach((el) => {
     if (!IsEnabled()) return;
     const panel = this.dataset.jsfmenuRemove;
     if (panel == "objectMenu" && objectMenu.instance) {
+      objectMenu.instance.processStep(null);
       objectMenu.instance.remove();
       objectMenu.show(false);
       console.log("Object has been removed.");

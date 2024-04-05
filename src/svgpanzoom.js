@@ -1,7 +1,10 @@
-let spzInstance = null;
+import "./lib/hammer";
+import "./lib/svg-pan-zoom.min.js";
 
-export function Init(element) {
-  spzInstance = svgPanZoom(element, {
+let spz = null;
+
+function spzInit(element) {
+  spz = svgPanZoom(element, {
     zoomEnabled: true,
     controlIconsEnabled: false,
     fit: true,
@@ -65,33 +68,7 @@ export function Init(element) {
         this.hammer.destroy();
       },
     },
-    // beforePan: function (oldPan, newPan) {
-    //   const width = JSF.nodeElements.mainSVG.clientWidth;
-    //   const height = JSF.nodeElements.mainSVG.clientHeight;
-    //   console.log(width);
-    //   var stopHorizontal = false,
-    //     stopVertical = false,
-    //     gutterWidth = 100,
-    //     gutterHeight = 100,
-    //     // Computed variables
-    //     sizes = this.getSizes(),
-    //     leftLimit = -((sizes.viewBox.x + sizes.viewBox.width) * sizes.realZoom) + gutterWidth,
-    //     rightLimit = sizes.width - gutterWidth - sizes.viewBox.x * sizes.realZoom,
-    //     topLimit = -((sizes.viewBox.y + sizes.viewBox.height) * sizes.realZoom) + gutterHeight,
-    //     bottomLimit = sizes.height - gutterHeight - sizes.viewBox.y * sizes.realZoom;
-
-    //   customPan = {};
-    //   customPan.x = Math.max(leftLimit, Math.min(rightLimit, newPan.x));
-    //   customPan.y = Math.max(topLimit, Math.min(bottomLimit, newPan.y));
-
-    //   return customPan;
-    // },
   });
 }
 
-export function getSPZ() {
-  if (!spzInstance) {
-    throw new Error("SVG Pan Zoom instance has not been initialized.");
-  }
-  return spzInstance;
-}
+export { spzInit, spz };

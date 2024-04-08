@@ -23,6 +23,7 @@ export const DataNames = {
 
 export const Colors = {
   black: "#000",
+  white: "#fff",
   darkblue: "#006da8",
   lightblue: "#00a5ff",
   lightblue_alpha: "#00a5ff7d",
@@ -30,3 +31,11 @@ export const Colors = {
   dimblue_alpha: "#1c9ce23d",
   alpha100: "#ffffff00",
 };
+
+export const BorderDashArrays = {
+  dotted: "2,6",
+  dashed: "7,6",
+  plot: "5,5",
+};
+
+export const customUserEvents = {};

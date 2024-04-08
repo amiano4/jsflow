@@ -27,9 +27,11 @@ export function getMouse(evt) {
   mouse.y /= mouse.scale;
   // relative to grid
 
+  const nodeSize = Pixels.SIZE * Pixels.GRID;
+
   mouse.toGrid = {
-    x: Math.floor((mouse.x + (Sizes.gridNodes * Sizes.perNode) / 2) / Sizes.perNode),
-    y: Math.floor((mouse.y + (Sizes.gridNodes * Sizes.perNode) / 2) / Sizes.perNode),
+    x: Math.floor((mouse.x + nodeSize / 2) / Pixels.SIZE),
+    y: Math.floor((mouse.y + nodeSize / 2) / Pixels.SIZE),
   };
 
   return mouse;

@@ -2,6 +2,7 @@ import { spz, spzInit } from "./svgpanzoom";
 import { createElement, createDefElement } from "./utils/element";
 import { panToCenter } from "./utils/functions";
 import { DataNames, Pixels, canvas } from "./utils/variables";
+import init from "./events/init";
 
 function create(container) {
   try {
@@ -57,6 +58,9 @@ function create(container) {
 
     // default pan position
     panToCenter();
+
+    // binding events
+    init();
   } catch (err) {
     console.error(err);
   }

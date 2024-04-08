@@ -12,4 +12,8 @@ export default function init() {
       }
     });
   });
+
+  if (customUserEvents.hasOwnProperty("init")) {
+    customUserEvents.init.forEach((customFn) => customFn(canvas));
+  }
 }

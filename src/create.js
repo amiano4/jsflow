@@ -55,6 +55,7 @@ function create(container) {
 
     // initialize zooming and panning
     spzInit(canvas.element);
+    spz.disableMouseWheelZoom();
 
     // default pan position
     panToCenter();

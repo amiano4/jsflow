@@ -1,6 +1,7 @@
+import Icons from "./icons";
 import { DataNames, Pixels, Colors } from "./variables";
 
-function createElementId(counter) {
+export function createElementId(counter) {
   return () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
@@ -14,9 +15,9 @@ function createElementId(counter) {
   };
 }
 
-const uniqid = createElementId(0);
+export const uniqid = createElementId(0);
 
-function createElement(elementType, dataAttr = {}, ns = "http://www.w3.org/2000/svg") {
+export function createElement(elementType, dataAttr = {}, ns = "http://www.w3.org/2000/svg") {
   const element = document.createElementNS(ns, elementType);
   element.id = uniqid();
 
@@ -26,7 +27,7 @@ function createElement(elementType, dataAttr = {}, ns = "http://www.w3.org/2000/
   return element;
 }
 
-function createDefElement() {
+export function createDefElement() {
   const { SIZE, MINI_GRID } = Pixels;
   const { SHAPE_OBJECT, TEXT_NODE, RESIZE_ANCHOR, CONNECTOR_ANCHOR, PATH_ANCHOR } = DataNames;
   const subGrid = SIZE * MINI_GRID;
@@ -101,4 +102,135 @@ function createDefElement() {
   return defs;
 }
 
-export { createElement, uniqid, createDefElement };
+export function jfMarkup() {
+  const jfContainer = document.createElement("div");
+  jfContainer.classList.add("jfContainer");
+  jfContainer.innerHTML = `
+    <div class="jfToolbar">
+      <ul class="jfToolbarMenu">
+        <li title="Undo">
+          <button type="button"><i class="ri-arrow-left-line"></i></button>
+        </li>
+        <li title="Redo">
+          <button type="button"><i class="ri-arrow-right-line"></i></button>
+        </li>
+        <li class="separator"></li>
+        <li title="Zoom">
+          <select>
+            <option value="100">50%</option>
+            <option value="100" selected>100%</option>
+          </select>
+        </li>
+        <li class="separator"></li>
+        <li title="Zoom in">
+          <button type="button"><i class="ri-zoom-in-line"></i></button>
+        </li>
+        <li title="Zoom out">
+          <button type="button"><i class="ri-zoom-out-line"></i></button>
+        </li>
+        <li class="separator"></li>
+        <li title="Copy">
+          <button type="button"><i class="ri-file-copy-line"></i></button>
+        </li>
+        <li title="Delete">
+          <button type="button"><i class="ri-delete-bin-line"></i></button>
+        </li>
+        <li class="separator"></li>
+        <li title="To front">
+          <button type="button"><i class="ri-bring-to-front"></i></button>
+        </li>
+        <li title="To back">
+          <button type="button"><i class="ri-send-to-back"></i></button>
+        </li>
+        <li class="separator"></li>
+        <li title="Toggle mode">
+          <label class="jfModeMenu" role="button">
+            <input type="checkbox" class="jfModeToggle" checked />
+            <i class="ri-eye-line mode_view"></i>
+            <span class="mode_view"> View mode</span>
+            <i class="ri-edit-line mode_edit"></i>
+            <span class="mode_edit"> Edit mode</span>
+          </label>
+        </li>
+      </ul>
+      <ul class="jfToolbarMenu">
+        <li title="Right Panel">
+          <label role="button">
+            <i class="ri-layout-right-line"></i>
+            <input type="checkbox" class="jfRightPanelToggle" />
+          </label>
+        </li>
+      </ul>
+    </div>
+    <div class="jfContent">
+      <aside class="jfContentLeftPanel">
+        <div class="jfContentToggleMenu">
+          <label>
+            <strong class="menu-button"> Shapes <i class="ri-arrow-down-s-fill"></i> </strong>
+            <input type="checkbox" class="menu-toggle" />
+          </label>
+          <ul class="jfContentLeftPanelMenu">
+            <li title="Rectangle">
+              <button type="button">${Icons.rectangle}Rectangle</button>
+            </li>
+            <li title="Circle">
+              <button type="button">${Icons.circle}Circle</button>
+            </li>
+            <li title="Ellipse">
+              <button type="button">${Icons.ellipse}Ellipse</button>
+            </li>
+            <li title="Diamond">
+              <button type="button">${Icons.diamond}Diamond</button>
+            </li>
+            <li title="Text">
+              <button type="button">${Icons.text}Text Box</button>
+            </li>
+          </ul>
+        </div>
+        <div class="jfContentToggleMenu">
+          <label>
+            <strong class="menu-button"> Lines <i class="ri-arrow-down-s-fill"></i> </strong>
+            <input type="checkbox" class="menu-toggle" />
+          </label>
+          <ul class="jfContentLeftPanelMenu">
+            <li title="Line">
+              <button type="button">${Icons.line}Line</button>
+            </li>
+            <li title="Arrow Line">
+              <button type="button">${Icons.arrowLine}Arrow</button>
+            </li>
+            <li title="Double Arrow Line">
+              <button type="button">${Icons.doubleArrow}Double Arrow</button>
+            </li>
+            <li title="Elbow-type Line">
+              <button type="button">${Icons.elbow}Line (elbow)</button>
+            </li>
+            <li title="Elbow-type Arrow line">
+              <button type="button">${Icons.arrowElbow}Arrow (elbow)</button>
+            </li>
+            <li title="Elbow-type Double Arrow Line">
+              <button type="button">
+                ${Icons.doubleArrowElbow}Double Arrow (elbow)
+              </button>
+            </li>
+          </ul>
+        </div>
+      </aside>
+      <div class="jfContentDiagram">
+        <div class="jfContentDiagramWrap"></div>
+      </div>
+      <div class="jfContentRightPanel"></div>
+    </div>
+  `;
+  return jfContainer;
+}
+
+export function createStyle() {
+  const style = document.createElement("style");
+  style.setAttribute("type", "text/css");
+  style.innerHTML = `
+  
+  
+  `;
+  return style;
+}

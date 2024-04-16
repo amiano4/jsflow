@@ -1,0 +1,209 @@
+:root {
+  --jfGray: rgb(241, 243, 244);
+  --jfBorderColor: rgb(211, 211, 211);
+  --jfLightBorderColor: rgb(229, 229, 229);
+  --jfPanelPadding: 0.5rem 0.3rem;
+}
+
+.jfContainer {
+  display: flex;
+  height: inherit;
+  flex-direction: column;
+}
+
+.jfContainer * {
+  font-size: 12px;
+  transition: all 0.15s ease-out;
+  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+.jfContent {
+  background-color: white;
+  flex: 5 0 auto;
+  display: flex;
+}
+
+.jfContentDiagram {
+  flex: 1 5;
+  position: relative;
+}
+
+.jfContentDiagramWrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.jfIcons {
+  object-fit: scale-down;
+  object-position: center;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.jfRightPanelToggle {
+  display: none;
+}
+
+/* toolbar section */
+
+.jfToolbar {
+  padding: var(--jfPanelPadding);
+  background-color: var(--jfGray);
+  border-bottom: 1px solid var(--jfBorderColor);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jfToolbarMenu {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.jfToolbarMenu li > * {
+  border: none;
+  color: rgb(89, 89, 89);
+  background-color: transparent;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  height: 100%;
+  outline: none;
+  width: auto;
+  text-wrap: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.jfToolbarMenu li.active > *,
+.jfToolbarMenu li:has(label input:checked) label {
+  background-color: var(--jfBorderColor);
+  color: #000;
+}
+
+.jfToolbarMenu li > *:hover {
+  background-color: var(--jfLightBorderColor);
+  color: #000;
+}
+
+.jfToolbarMenu i {
+  font-size: 18px;
+}
+
+.jfToolbarMenu li.separator {
+  flex: 0 0 2px;
+  background-color: var(--jfBorderColor);
+}
+
+.jfModeMenu .jfModeToggle {
+  display: none;
+}
+
+.jfModeMenu .mode_view {
+  display: none;
+}
+
+.jfModeMenu:has(.jfModeToggle:checked) .mode_view {
+  display: flex;
+}
+
+.jfModeMenu:has(.jfModeToggle:checked) .mode_edit {
+  display: none;
+}
+
+/* end of toolbar section */
+
+/* left panel */
+
+.jfContentLeftPanel {
+  background-color: var(--jfGray);
+  padding: var(--jfPanelPadding);
+  border-right: 1px solid var(--jfBorderColor);
+  min-width: 100px;
+  user-select: none;
+}
+
+.jfContentLeftPanelMenu {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.jfContentLeftPanelMenu li {
+  padding: 0.2rem 0.5rem;
+}
+
+.jfContentLeftPanelMenu button {
+  border: none;
+  color: rgb(55, 55, 55);
+  background-color: transparent;
+  padding: 0.6rem 0.5rem;
+  border-radius: 2px;
+  height: 100%;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  max-width: 4.5rem;
+}
+
+.jfContentToggleMenu {
+  margin-bottom: 0.5rem;
+}
+
+.jfContentLeftPanelMenu button:hover {
+  background-color: var(--jfLightBorderColor);
+  color: #000;
+}
+
+.jfContentToggleMenu .menu-toggle {
+  display: none;
+}
+
+.jfContentToggleMenu .jfContentLeftPanelMenu {
+  display: none;
+}
+
+.jfContentToggleMenu:has(.menu-toggle:checked) .jfContentLeftPanelMenu {
+  display: grid;
+}
+
+.jfContentToggleMenu .menu-button {
+  padding: 0.3rem 0.2rem;
+  display: block;
+  border-radius: 2px;
+  border-bottom: 1px solid var(--jfLightBorderColor);
+  color: rgb(51, 51, 51);
+}
+
+.jfContentToggleMenu .menu-button:hover {
+  border-bottom: 1px solid var(--jfBorderColor);
+  color: black;
+}
+
+/* end of left panel */
+
+/* right panel */
+
+.jfContainer:has(.jfRightPanelToggle:checked) .jfContentRightPanel {
+  width: 10rem;
+}
+
+.jfContentRightPanel {
+  background-color: var(--jfGray);
+  border-left: 1px solid var(--jfBorderColor);
+  overflow: hidden;
+  z-index: 1;
+  width: 0;
+}
+
+/* end of right panel */

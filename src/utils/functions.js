@@ -14,25 +14,25 @@ export function getMouse(evt) {
     y: evt.clientY - ry,
   };
 
-  const svgMatrix = canvas.wrapper.transform.baseVal.consolidate().matrix;
-  mouse.scale = svgMatrix.a;
-  mouse.offset = {
-    x: svgMatrix.e,
-    y: svgMatrix.f,
-  };
+  // const svgMatrix = canvas.wrapper.transform.baseVal.consolidate().matrix;
+  // mouse.scale = svgMatrix.a;
+  // mouse.offset = {
+  //   x: svgMatrix.e,
+  //   y: svgMatrix.f,
+  // };
 
-  mouse.x -= mouse.offset.x;
-  mouse.y -= mouse.offset.y;
-  mouse.x /= mouse.scale;
-  mouse.y /= mouse.scale;
-  // relative to grid
+  // mouse.x -= mouse.offset.x;
+  // mouse.y -= mouse.offset.y;
+  // mouse.x /= mouse.scale;
+  // mouse.y /= mouse.scale;
+  // // relative to grid
 
-  const nodeSize = Pixels.SIZE * Pixels.GRID;
+  // const nodeSize = Pixels.SIZE * Pixels.GRID;
 
-  mouse.toGrid = {
-    x: Math.floor((mouse.x + nodeSize / 2) / Pixels.SIZE),
-    y: Math.floor((mouse.y + nodeSize / 2) / Pixels.SIZE),
-  };
+  // mouse.toGrid = {
+  //   x: Math.floor((mouse.x + nodeSize / 2) / Pixels.SIZE),
+  //   y: Math.floor((mouse.y + nodeSize / 2) / Pixels.SIZE),
+  // };
 
   return mouse;
 }

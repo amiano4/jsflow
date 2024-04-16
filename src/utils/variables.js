@@ -5,8 +5,8 @@ export const canvas = {};
 
 export const Pixels = {
   SIZE: 16,
-  MINI_GRID: 5,
-  GRID: 500,
+  MINI_GRID: 4,
+  GRID: 1000,
 };
 
 Pixels.ANCHOR_POINT = Pixels.SIZE * 0.65;

@@ -9,6 +9,8 @@ function spzInit(element) {
     controlIconsEnabled: false,
     fit: true,
     center: true,
+    minZoom: 0.25,
+    maxZoom: 5,
     dblClickZoomEnabled: false,
     customEventsHandler: {
       haltEventListeners: ["touchstart", "touchend", "touchmove", "touchleave", "touchcancel"],
